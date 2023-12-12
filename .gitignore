@@ -1,0 +1,35 @@
+# Django
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+
+# Static files
+static/
+
+# Media files
+media/
+
+# Virtual environment
+venv/
+.env
+
+# IDE files
+.vscode/
+*.code-workspace
+
+# React
+node_modules/
+build/
+.DS_Store
+coverage/
+
+# Editor files
+*.sublime-workspace
+*.sublime-project
+*.idea/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
