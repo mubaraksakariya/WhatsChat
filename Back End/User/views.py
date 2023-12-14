@@ -62,4 +62,7 @@ class CustomLogin(APIView):
         otp = request.data['otp']
         return Response({
             'message': 'This is a PUT request',
+            'email':email,
+            'otp':otp,
+            
         },status=200)

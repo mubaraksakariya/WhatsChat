@@ -2,10 +2,14 @@ import React from 'react';
 import './VerifyOtp.css';
 import { useAxios } from '../../contexts/AxiosContext';
 import { useNavigate } from 'react-router-dom';
+import CountDownTimer from '../../Components/CountDownTimer';
 
 function VerifyOtp() {
 	const axios = useAxios();
 	const navigate = useNavigate();
+	const onReset = () => {
+		console.log('otp resend');
+	};
 	const manageVerify = (e) => {
 		e.preventDefault();
 		const data = {
@@ -14,7 +18,7 @@ function VerifyOtp() {
 		};
 		console.log(data);
 		axios.put('login', data).then((response) => {
-			console.log(response);
+			console.log(response.data);
 			if (response.status === 200) {
 				// navigate('/');
 				console.log(localStorage.getItem('email'));
@@ -45,6 +49,9 @@ function VerifyOtp() {
 						className='focus:outline-none text-white bg-themeGreenButton1 hover:bg-themeGreenButton3 focus:ring-2 focus:ring-bu font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-themeGreenButton1 dark:hover:bg '>
 						Verify
 					</button>
+				</div>
+				<div className=' my-3 flex justify-center'>
+					<CountDownTimer onReset={onReset} />
 				</div>
 			</form>
 		</div>
