@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import './VerifyOtp.css';
-import { useAxios } from '../../contexts/AxiosContext';
+import { useAxios } from '../../Contexts/AxiosContext';
 import { useNavigate } from 'react-router-dom';
 import CountDownTimer from '../../Components/CountDownTimer';
+import { useAuth } from '../../Contexts/AuthContext';
 
 function VerifyOtp() {
 	const axios = useAxios();
 	const navigate = useNavigate();
 	const [message, setMessage] = useState('');
-
+	const { login } = useAuth();
 	const onReset = () => {
 		let email = localStorage.getItem('email');
 		const data = {
@@ -32,6 +33,7 @@ function VerifyOtp() {
 			if (response.status === 200 && response.data.result) {
 				setMessage(response.data.message);
 				localStorage.setItem('token', response.data.token);
+				login();
 				navigate('/');
 			}
 			if (response.status === 200 && !response.data.result) {

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import './SignUp.css';
 // import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
-import { useAxios } from '../../contexts/AxiosContext';
+import { useAxios } from '../../Contexts/AxiosContext';
 import { useNavigate } from 'react-router-dom';
 
 function SignUp({ setIsDark }) {
