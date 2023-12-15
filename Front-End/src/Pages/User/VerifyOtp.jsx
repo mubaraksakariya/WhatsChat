@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './VerifyOtp.css';
 import { useAxios } from '../../contexts/AxiosContext';
 import { useNavigate } from 'react-router-dom';
@@ -7,8 +7,20 @@ import CountDownTimer from '../../Components/CountDownTimer';
 function VerifyOtp() {
 	const axios = useAxios();
 	const navigate = useNavigate();
+	const [message, setMessage] = useState('');
+
 	const onReset = () => {
-		console.log('otp resend');
+		let email = localStorage.getItem('email');
+		const data = {
+			email,
+		};
+		axios.post('login', data).then((response) => {
+			console.log(response);
+			if (response.status === 202) {
+				console.log('done');
+				setMessage('Requested for a new OTP');
+			}
+		});
 	};
 	const manageVerify = (e) => {
 		e.preventDefault();
@@ -16,12 +28,14 @@ function VerifyOtp() {
 			otp: e.target.otp.value,
 			email: localStorage.getItem('email'),
 		};
-		console.log(data);
 		axios.put('login', data).then((response) => {
-			console.log(response.data);
-			if (response.status === 200) {
-				// navigate('/');
-				console.log(localStorage.getItem('email'));
+			if (response.status === 200 && response.data.result) {
+				setMessage(response.data.message);
+				localStorage.setItem('token', response.data.token);
+				navigate('/');
+			}
+			if (response.status === 200 && !response.data.result) {
+				setMessage(response.data.message);
 			}
 		});
 	};
@@ -52,6 +66,9 @@ function VerifyOtp() {
 				</div>
 				<div className=' my-3 flex justify-center'>
 					<CountDownTimer onReset={onReset} />
+				</div>
+				<div className=' my-3 flex justify-center'>
+					<span className=' text-red-600'>{message}</span>
 				</div>
 			</form>
 		</div>

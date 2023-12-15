@@ -5,21 +5,20 @@ from rest_framework.response import Response
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 import random
-
+from .models import CustomUser
 def generate_otp():
     otp = ''.join([str(random.randint(0, 9)) for _ in range(6)])
     return otp
 
-def send_otp(to_email):
+def send_otp(to_email,otp):
     print(f"Sending OTP to: {to_email}")
-    otp = generate_otp()
+    otp = otp
     message = Mail(
         from_email='mubaraksakariya@gmail.com',
         to_emails=to_email,
         subject='Login with OTP',
         html_content=f'<strong>Your OTP for login is - {otp} </strong>')
-    
-
+      
     try:
         sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
         response = sg.send(message)
@@ -39,12 +38,16 @@ class CustomLogin(APIView):
         try:
             email = request.data.get('email')
             if email:
-                response = send_otp(email)
+                user, created = CustomUser.objects.get_or_create(email=email)
+                otp = generate_otp()
+                user.otp = otp
+                user.save()
+                response = send_otp(email, otp)
                 return Response({
                     'email': email,
                     'message': 'Trying to send OTP to the email',
                     'result': response,
-                },status=response)
+                }, status=response)
             else:
                 return Response({
                     'error': 'Email is missing in the request data.',
@@ -56,13 +59,26 @@ class CustomLogin(APIView):
     
 
     def put(self, request, *args, **kwargs):
-        # Your GET request logic
-        print(request.data['otp'])
-        email = request.data['email']
-        otp = request.data['otp']
-        return Response({
-            'message': 'This is a PUT request',
-            'email':email,
-            'otp':otp,
-            
-        },status=200)
+        try:
+            email = request.data.get('email')
+            otp = request.data.get('otp')
+            user, created = CustomUser.objects.get_or_create(email=email)
+            if user.otp == otp:
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({
+                    'message': 'The user is authenticated',
+                    'email': email,
+                    'result':True,
+                    'token': token.key,
+                }, status=200)
+            else:
+                return Response({
+                    'message': 'The otp does not match',
+                    'email': email,
+                    'result':False,
+                    'token': None,
+                }, status=200)
+        except Exception as e:
+            return Response({
+                'error': f'An error occurred: {str(e)}',
+            }, status=500)

@@ -1,9 +1,11 @@
 /** @type {import('tailwindcss').Config} */
+import defaultColors from 'tailwindcss/colors';
 export default {
 	content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
 	theme: {
 		extend: {},
 		colors: {
+			...defaultColors,
 			themeBlue: '#111B21',
 			themeGreen: '#00A884',
 			themeGreenButton1: '#008040',
