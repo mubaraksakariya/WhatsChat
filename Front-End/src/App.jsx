@@ -59,7 +59,11 @@ function App() {
 	} else
 		return (
 			<div className={isDark ? 'dark' : ''}>
-				<RouterProvider router={router} />
+				<div className='relative min-h-screen bg-black flex justify-center  items-center'>
+					<div className='w-screen max-w-lg  bg-themeBlue  min-h-screen m-y10 flex justify-center  items-center'>
+						<RouterProvider router={router} />
+					</div>
+				</div>
 			</div>
 		);
 }
