@@ -10,6 +10,8 @@ import Admin from './Pages/Admin/Admin';
 import SignUp from './Pages/User/SignUp';
 import { useState, useEffect } from 'react';
 import { useAuth } from './Contexts/AuthContext';
+import NewChat from './Pages/User/NewChat';
+import NewContact from './Pages/User/NewContact';
 
 function App() {
 	const [isDark, setIsDark] = useState(false);
@@ -44,12 +46,33 @@ function App() {
 					),
 				},
 				{
-					path: '/admin',
+					path: 'newchat',
 					element: isAuthenticated ? (
-						<Admin />
+						<NewChat setIsDark={setIsDark} />
 					) : (
 						<Navigate to='/signup' />
 					),
+				},
+				{
+					path: 'new-contact',
+					element: isAuthenticated ? (
+						<NewContact setIsDark={setIsDark} />
+					) : (
+						<Navigate to='/signup' />
+					),
+				},
+				{
+					path: '/admin',
+					children: [
+						{
+							path: '',
+							element: isAuthenticated ? (
+								<Admin />
+							) : (
+								<Navigate to='/signup' />
+							),
+						},
+					],
 				},
 			],
 		},
@@ -60,7 +83,7 @@ function App() {
 		return (
 			<div className={isDark ? 'dark' : ''}>
 				<div className='relative min-h-screen bg-black flex justify-center  items-center'>
-					<div className='w-screen max-w-lg  bg-themeBlue  min-h-screen m-y10 flex justify-center  items-center'>
+					<div className='w-screen max-w-lg  bg-themeBlue  min-h-screen flex justify-center  items-center'>
 						<RouterProvider router={router} />
 					</div>
 				</div>

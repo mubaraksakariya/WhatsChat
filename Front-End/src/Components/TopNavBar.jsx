@@ -4,7 +4,7 @@ import './TopNavBar.css';
 function TopNavBar() {
 	const { logout } = useAuth();
 	return (
-		<div className='flex justify-between p-5'>
+		<div className='flex justify-between items-center px-5 py-7'>
 			<div>
 				<h3 className='text-2xl'>WhatsChat</h3>
 			</div>
