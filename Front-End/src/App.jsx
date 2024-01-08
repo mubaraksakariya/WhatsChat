@@ -12,6 +12,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from './Contexts/AuthContext';
 import NewChat from './Pages/User/NewChat';
 import NewContact from './Pages/User/NewContact';
+import ChatPage from './Pages/User/ChatPage';
 
 function App() {
 	const [isDark, setIsDark] = useState(false);
@@ -62,6 +63,14 @@ function App() {
 					),
 				},
 				{
+					path: 'chat',
+					element: isAuthenticated ? (
+						<ChatPage setIsDark={setIsDark} />
+					) : (
+						<Navigate to='/signup' />
+					),
+				},
+				{
 					path: '/admin',
 					children: [
 						{
@@ -82,8 +91,9 @@ function App() {
 	} else
 		return (
 			<div className={isDark ? 'dark' : ''}>
-				<div className='relative min-h-screen bg-black flex justify-center  items-center'>
-					<div className='w-screen max-w-lg  bg-themeBlue  min-h-screen flex justify-center  items-center'>
+				<div className=' min-h-screen bg-black flex justify-center  items-center'>
+					<div className='w-screen max-w-lg  bg-themeBlue  min-h-screen'>
+						{/*  flex justify-center  items-center is removed from classNames */}
 						<RouterProvider router={router} />
 					</div>
 				</div>

@@ -1,17 +1,62 @@
 import React, { useState } from 'react';
 import NewContactNavBar from '../../Components/Chats/Newchat/NewContactNavBar';
+import { useNavigate } from 'react-router-dom';
+import {
+	addContact,
+	isEmailUnique,
+} from '../../Components/Contacts/ContactsApi';
 // import PhoneInput from 'react-phone-input-2';
 
 function NewContact() {
 	// const [phone, setPhone] = useState('');
-	const manageSubmit = (e) => {
-		e.preventDefault();
-		let firstName = e.target.elements.firstname.value;
-		let lastName = e.target.elements.lastname.value;
-		let email = e.target.elements.email.value;
-		const data = { firstName, lastName, email };
-		console.log(data);
+	const [error, setError] = useState('');
+	const navigate = useNavigate();
+
+	const validateEmail = (email) => {
+		// Email validation regex
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		return emailRegex.test(email);
 	};
+
+	const manageSubmit = async (e) => {
+		e.preventDefault();
+		setError('');
+		const firstName = e.target.elements.firstname.value;
+		const lastName = e.target.elements.lastname.value;
+		const email = e.target.elements.email.value;
+		if (!validateEmail(email)) {
+			setError('Please enter a valid email address.');
+			return;
+		}
+		const data = {
+			firstName,
+			lastName,
+			email,
+		};
+		try {
+			const isUnique = await isEmailUnique(email);
+			if (!isUnique) {
+				setError('Email address must be unique.');
+				return;
+			}
+
+			// Reset error state
+			setError('');
+
+			// Add the new contact to IndexedDB
+			await addContact(data);
+
+			console.log('Contact added successfully to IndexedDB');
+
+			// Reset the form using the 'e' event object
+			e.target.reset();
+			navigate(-1);
+		} catch (error) {
+			console.error('Error performing form submission:', error);
+			setError('Error performing form submission:', error);
+		}
+	};
+
 	return (
 		<div className='w-full min-h-[100dvh] text-warmGray-300 relative'>
 			<NewContactNavBar />
@@ -148,7 +193,11 @@ function NewContact() {
 							</label>
 						</div>
 					</div> */}
+					<div className=' text-center pt-5 text-sm text-red-500'>
+						<span>{error} </span>
+					</div>
 				</div>
+
 				<div className='px-4  pb-7 absolute w-full bottom-0 left-0'>
 					<button
 						type='submit'

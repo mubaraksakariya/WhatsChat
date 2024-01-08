@@ -1,14 +1,24 @@
 import React from 'react';
-import { useAuth } from '../../../Contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../Contexts/AuthContext';
 import { Dropdown } from 'flowbite-react';
+import ChatPageUser from './ChatPageUser';
 
-function NewChatNavBar() {
+function ChatPageNav({ user }) {
 	const { logout } = useAuth();
 	const navigate = useNavigate();
+
+	const startVideoCall = () => {
+		console.log('Video call');
+	};
+	const startAudioCall = () => {
+		console.log('Audio call');
+	};
+
 	return (
-		<div className='flex justify-between bg-themeBlueSecondary py-5 px-5'>
+		<div className='flex justify-between bg-themeBlueSecondary  py-7 px-5 text-warmGray-300'>
 			<div className='flex items-center gap-3'>
+				{/* back button */}
 				<div className='cursor-pointer' onClick={() => navigate('/')}>
 					<svg
 						xmlns='http://www.w3.org/2000/svg'
@@ -26,23 +36,29 @@ function NewChatNavBar() {
 					</svg>
 				</div>
 				<div>
-					<h3>Select Contact</h3>
-					<p className='text-xs'>100 contacts</p>
+					<ChatPageUser user={user} />
 				</div>
 			</div>
-			<div className='flex items-center gap-3'>
-				<div>
+			<div className='flex items-center gap-5'>
+				<div className='cursor-pointer' onClick={startVideoCall}>
 					<svg
 						xmlns='http://www.w3.org/2000/svg'
-						fill='none'
 						viewBox='0 0 24 24'
-						strokeWidth={1.5}
-						stroke='currentColor'
+						fill='currentColor'
+						className='w-6 h-6'>
+						<path d='M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h8.25a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3H4.5ZM19.94 18.75l-2.69-2.69V7.94l2.69-2.69c.944-.945 2.56-.276 2.56 1.06v11.38c0 1.336-1.616 2.005-2.56 1.06Z' />
+					</svg>
+				</div>
+				<div className='cursor-pointer' onClick={startAudioCall}>
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						viewBox='0 0 28 28'
+						fill='currentColor'
 						className='w-6 h-6'>
 						<path
-							strokeLinecap='round'
-							strokeLinejoin='round'
-							d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'
+							fillRule='evenodd'
+							d='M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z'
+							clipRule='evenodd'
 						/>
 					</svg>
 				</div>
@@ -80,4 +96,4 @@ function NewChatNavBar() {
 	);
 }
 
-export default NewChatNavBar;
+export default ChatPageNav;

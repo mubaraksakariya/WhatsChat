@@ -64,6 +64,7 @@ class CustomLogin(APIView):
             otp = request.data.get('otp')
             user, created = CustomUser.objects.get_or_create(email=email)
             if user.otp == otp:
+                print(user)
                 token, created = Token.objects.get_or_create(user=user)
                 return Response({
                     'message': 'The user is authenticated',
@@ -79,6 +80,7 @@ class CustomLogin(APIView):
                     'token': None,
                 }, status=200)
         except Exception as e:
+            print({str(e)})
             return Response({
                 'error': f'An error occurred: {str(e)}',
             }, status=500)

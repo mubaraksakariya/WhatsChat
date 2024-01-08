@@ -1,6 +1,8 @@
 import React from 'react';
 import { useAuth } from '../Contexts/AuthContext';
 import './TopNavBar.css';
+import { Dropdown } from 'flowbite-react';
+
 function TopNavBar() {
 	const { logout } = useAuth();
 	return (
@@ -41,57 +43,33 @@ function TopNavBar() {
 					/>
 				</svg>
 
-				<button
-					id='dropdownOffsetButton'
-					data-dropdown-toggle='dropdownLeft'
-					data-dropdown-placement='left'
-					data-dropdown-offset-distance='1'
-					data-dropdown-offset-skidding='100'
-					className='text-warmGray-300 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 hover:text-white p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:border-gray-700 dark:hover:bg-gray-700 md:dark:hover:bg-transparent'>
-					<svg
-						xmlns='http://www.w3.org/2000/svg'
-						fill='none'
-						viewBox='0 0 24 24'
-						strokeWidth={1.5}
-						stroke='currentColor'
-						className='w-6 h-6'>
-						<path
-							strokeLinecap='round'
-							strokeLinejoin='round'
-							d='M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z'
-						/>
-					</svg>
-				</button>
-				<div
-					id='dropdownLeft'
-					className='z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600'>
-					<ul
-						className='py-2 text-sm text-gray-700 dark:text-gray-400'
-						aria-labelledby='dropdownLargeButton'>
-						<li>
-							<a
-								href='#'
-								className='block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white'>
-								Dashboard
-							</a>
-						</li>
-						<li>
-							<a
-								href='#'
-								className='block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white'>
-								Settings
-							</a>
-						</li>
-					</ul>
-					<div className='py-1'>
-						<a
-							onClick={logout}
-							href='#'
-							className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white'>
-							Sign out
-						</a>
-					</div>
-				</div>
+				<Dropdown
+					label=':'
+					placement='left-start'
+					renderTrigger={() => (
+						<button className='text-warmGray-300 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 hover:text-white p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:border-gray-700 dark:hover:bg-gray-700 md:dark:hover:bg-transparent'>
+							<svg
+								xmlns='http://www.w3.org/2000/svg'
+								fill='none'
+								viewBox='0 0 24 24'
+								strokeWidth={1.5}
+								stroke='currentColor'
+								className='w-6 h-6'>
+								<path
+									strokeLinecap='round'
+									strokeLinejoin='round'
+									d='M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z'
+								/>
+							</svg>
+						</button>
+					)}>
+					<Dropdown.Item>Dashboard</Dropdown.Item>
+					<Dropdown.Item>Settings</Dropdown.Item>
+					<Dropdown.Divider />
+					<Dropdown.Item onClick={() => logout()}>
+						Sign out
+					</Dropdown.Item>
+				</Dropdown>
 			</div>
 		</div>
 	);

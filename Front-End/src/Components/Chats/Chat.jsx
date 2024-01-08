@@ -4,7 +4,7 @@ function Chat({ user, setSelectedChat }) {
 	return (
 		<div
 			className='flex px-5 py-5 justify-between cursor-pointer'
-			onClick={() => setSelectedChat(user.id)}>
+			onClick={() => setSelectedChat(user)}>
 			<div className='flex gap-4'>
 				<div className='flex flex-col justify-center'>
 					<img
@@ -14,7 +14,7 @@ function Chat({ user, setSelectedChat }) {
 					/>
 				</div>
 				<div>
-					<div>{user.name}</div>
+					<div>{user.firstName}</div>
 					<div>{user.lastMessage}</div>
 				</div>
 			</div>
