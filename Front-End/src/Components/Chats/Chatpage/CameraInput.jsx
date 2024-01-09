@@ -1,25 +1,49 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import WebCam from './WebCam';
+import ImageEditor from './ImageEditor';
 
-function CameraInput() {
+function CameraInput({ user }) {
 	const [cameraOn, setCameraOn] = useState(false);
-	const [image, setImage] = useState(null);
+	const [base64Image, setBase64Image] = useState(null);
+	const [finalImage, setFinalImage] = useState();
 
-	const manageCameraCapture = () => {
+	const sendImage = (editedImage) => {
+		console.log(editedImage);
+	};
+	const openCamera = () => {
 		setCameraOn(!cameraOn);
 	};
+
+	useEffect(() => {
+		console.log(finalImage);
+	}, [finalImage]);
+
 	return (
 		<>
 			{/* camera */}
 			{cameraOn && (
 				<div className=' absolute top-0 left-0 bg-black min-h-[100dvh] flex flex-col justify-center items-center'>
-					<WebCam setCameraOn={setCameraOn} setImage={setImage} />
+					<WebCam
+						setCameraOn={setCameraOn}
+						setImage={setBase64Image}
+					/>
 				</div>
 			)}
-			{/* camera toggle button icon */}
-
+			{/* image viewer */}
+			{base64Image && (
+				<div className=' absolute top-0 left-0 bg-black min-h-[100dvh] w-full flex flex-col justify-center items-center text-black'>
+					<ImageEditor
+						base64Image={base64Image}
+						setBase64Image={setBase64Image}
+						setFinalImage={setFinalImage}
+						setCameraOn={setCameraOn}
+						user={user}
+					/>
+				</div>
+			)}
+			{/* camera toggle button */}
 			<svg
-				onClick={manageCameraCapture}
+				onClick={openCamera}
 				xmlns='http://www.w3.org/2000/svg'
 				fill='none'
 				viewBox='0 0 24 24'

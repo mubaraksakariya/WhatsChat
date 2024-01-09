@@ -5,7 +5,7 @@ import ChatInputButton from './ChatInputButton';
 import FileInput from './FileInput';
 import CameraInput from './CameraInput';
 
-function ChatInput() {
+function ChatInput({ user }) {
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 	const [text, setText] = useState('');
 	const [attachment, setAttachment] = useState([]);
@@ -114,7 +114,7 @@ function ChatInput() {
 				{/* Camera Icon and button */}
 				{text === '' && (
 					<div className='mx-2 me-4'>
-						<CameraInput />
+						<CameraInput user={user} />
 					</div>
 				)}
 			</div>

@@ -37,7 +37,7 @@ function ChatPage() {
 				})}
 			</div>
 			<div className='flex-none p-2'>
-				<ChatInput />
+				<ChatInput user={user} />
 			</div>
 		</div>
 	);
