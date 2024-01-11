@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './ChatInputButton.css';
 
-function ChatInputButton({ icon, onclick }) {
+function ChatMessageSendButton({ icon, onclick }) {
 	const [animate, setAnimate] = useState(false);
 
 	useEffect(() => {
@@ -18,4 +18,4 @@ function ChatInputButton({ icon, onclick }) {
 	);
 }
 
-export default ChatInputButton;
+export default ChatMessageSendButton;

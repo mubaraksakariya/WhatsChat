@@ -2,20 +2,17 @@ import React, { useEffect, useState } from 'react';
 import WebCam from './WebCam';
 import ImageEditor from './ImageEditor';
 
-function CameraInput({ user }) {
+function CameraInput({ user, sendCameraImage }) {
 	const [cameraOn, setCameraOn] = useState(false);
 	const [base64Image, setBase64Image] = useState(null);
 	const [finalImage, setFinalImage] = useState();
 
-	const sendImage = (editedImage) => {
-		console.log(editedImage);
-	};
 	const openCamera = () => {
 		setCameraOn(!cameraOn);
 	};
 
 	useEffect(() => {
-		console.log(finalImage);
+		if (finalImage) sendCameraImage(finalImage);
 	}, [finalImage]);
 
 	return (

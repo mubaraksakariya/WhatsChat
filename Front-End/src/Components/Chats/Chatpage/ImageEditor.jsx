@@ -27,6 +27,8 @@ function ImageEditor({
 	const handleSaveImage = () => {
 		const data = { image: image, caption: captionRef.current.value };
 		setFinalImage(data);
+		setCameraOn(false);
+		setBase64Image(null);
 	};
 
 	useEffect(() => {
@@ -58,8 +60,12 @@ function ImageEditor({
 						</svg>
 					</button>
 					{/* current image */}
-					<div>
-						<img src={URL.createObjectURL(image)} alt='' />
+					<div className=' max-w-full object-contain'>
+						<img
+							src={URL.createObjectURL(image)}
+							alt=''
+							className='max-w-full object-contain'
+						/>
 					</div>
 
 					<div className=' absolute bottom-4 px-2  min-w-full'>

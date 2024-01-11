@@ -92,7 +92,7 @@ function App() {
 		return (
 			<div className={isDark ? 'dark' : ''}>
 				<div className=' min-h-screen bg-black flex justify-center  items-center'>
-					<div className='w-screen max-w-lg  bg-themeBlue  min-h-screen'>
+					<div className='w-screen max-w-lg  bg-themeBlue  min-h-screen flex justify-center  items-center'>
 						{/*  flex justify-center  items-center is removed from classNames */}
 						<RouterProvider router={router} />
 					</div>

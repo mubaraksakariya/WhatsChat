@@ -27,7 +27,7 @@ function ChatPage() {
 		},
 	];
 	return (
-		<div className=' relative flex flex-col min-h-[100dvh]'>
+		<div className=' relative flex flex-col min-h-[100dvh] overflow-hidden'>
 			<div>
 				<ChatPageNav user={user} />
 			</div>
