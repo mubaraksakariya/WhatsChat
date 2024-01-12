@@ -30,6 +30,7 @@ function ChatInput({ user }) {
 			const audioUrl = URL.createObjectURL(audioBlob);
 			const audio = new Audio(audioUrl);
 			audio.play();
+			console.log(audioBlob);
 		}
 	}, [audioBlob]);
 

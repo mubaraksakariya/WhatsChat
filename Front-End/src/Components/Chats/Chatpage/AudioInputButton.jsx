@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import './ChatInputButton.css';
 import AudioRecorder from './AudioRecorder';
+import AudioEditor from './AudioEditor';
 
 function AudioInputButton({ icon, file }) {
 	const [animate, setAnimate] = useState(false);
 	const [isTimerRunning, setIsTimerRunning] = useState(false);
 	const [timerSeconds, setTimerSeconds] = useState(0);
 	const [cancel, setCancel] = useState(false);
-	const [audioFile, setAudioFile] = useState(null);
+	const [audioFileForEdting, setAudioFileForEdting] = useState(null);
+	const [isEditing, setIsEditing] = useState(false);
 
 	useEffect(() => {
 		let intervalId;
@@ -37,10 +39,20 @@ function AudioInputButton({ icon, file }) {
 	};
 
 	const receiveAudioBlob = (audioBlob) => {
-		setAudioFile(audioBlob);
+		setAudioFileForEdting(audioBlob);
 		// const audioUrl = URL.createObjectURL(audioBlob);
 		// const audio = new Audio(audioUrl);
 		// audio.play();
+	};
+
+	const deleteFile = () => {
+		setAudioFileForEdting(null);
+	};
+
+	const confirmEdit = () => {
+		console.log('confirmed audio to send');
+		setIsEditing(false);
+		file(audioFileForEdting);
 	};
 
 	const formatTime = (seconds) => {
@@ -55,10 +67,10 @@ function AudioInputButton({ icon, file }) {
 	};
 
 	useEffect(() => {
-		if (!cancel && audioFile && timerSeconds >= 1) {
-			file(audioFile);
-		}
-	}, [audioFile]);
+		if (!cancel && audioFileForEdting && timerSeconds >= 1) {
+			setIsEditing(true);
+		} else setIsEditing(false);
+	}, [audioFileForEdting]);
 
 	useEffect(() => {
 		setAnimate(true); // Trigger animation on component mount
@@ -83,6 +95,14 @@ function AudioInputButton({ icon, file }) {
 					</div>
 					<div className='flex-1'>slide out to cancel</div>
 				</div>
+			)}
+			{isEditing && (
+				<AudioEditor
+					audioBlob={audioFileForEdting}
+					onDelete={deleteFile}
+					onSend={file}
+					confirmEdit={confirmEdit}
+				/>
 			)}
 			<button
 				className={`mx-2 px-2 rounded-full bg-themeGreenButton1 hover:bg-themeGreenButton2 active:bg-themeGreenButton3 aspect-square transition-all ${
