@@ -8,9 +8,10 @@ import AudioInputButton from './AudioInputButton';
 
 function ChatInput({ user }) {
 	const [text, setText] = useState('');
-	const [attachment, setAttachment] = useState([]);
+	const [attachment, setAttachment] = useState(null);
 	const [cameraImage, setCameraImage] = useState();
 	const [audioBlob, setAudioBlob] = useState(null);
+
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 	const parentDivRef = useRef(null);
 	const emojibtnRef = useRef(null);
@@ -25,14 +26,21 @@ function ChatInput({ user }) {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
 	}, []);
+
 	useEffect(() => {
 		if (audioBlob) {
-			const audioUrl = URL.createObjectURL(audioBlob);
-			const audio = new Audio(audioUrl);
-			audio.play();
+			// const audioUrl = URL.createObjectURL(audioBlob);
+			// const audio = new Audio(audioUrl);
+			// audio.play();
 			console.log(audioBlob);
 		}
-	}, [audioBlob]);
+		if (text) {
+			console.log(text);
+		}
+		if (attachment) {
+			console.log(attachment);
+		}
+	}, [audioBlob, cameraImage, attachment]);
 
 	const sendCameraImage = (image) => {
 		console.log(image);
@@ -49,32 +57,35 @@ function ChatInput({ user }) {
 			setShowEmojiPicker(false);
 		}
 	};
+
 	const emojiPickerToggle = () => {
 		setShowEmojiPicker(!showEmojiPicker);
 	};
+
 	const onEmojiClick = (item) => {
 		const inputElement = inputRef.current;
 		if (inputElement) {
 			const { selectionStart, selectionEnd } = inputElement;
-			const newText =
-				text.slice(0, selectionStart) +
-				item.emoji +
-				text.slice(selectionEnd);
-			setText(newText);
+			const textBeforeCursor = text.substring(0, selectionStart);
+			const textAfterCursor = text.substring(selectionEnd);
 
-			// Move the cursor to the position after the inserted emoji
+			const newText = textBeforeCursor + item.emoji + textAfterCursor;
+
+			// Calculate the new cursor position after the inserted emoji
 			const newCursorPosition = selectionStart + item.emoji.length;
+
+			// Set the new text and cursor position
+			setText(newText);
 			inputElement.setSelectionRange(
 				newCursorPosition,
 				newCursorPosition
 			);
 		}
 	};
-	const sendAudio = () => {
-		console.log('record audio');
-	};
+
 	const sendMessage = () => {
-		console.log('send the text and attachment message');
+		if (attachment) console.log(attachment);
+		if (text) console.log(text);
 	};
 
 	return (
@@ -143,7 +154,7 @@ function ChatInput({ user }) {
 				)}
 			</div>
 
-			{text === '' ? (
+			{text === '' && attachment == null ? (
 				<AudioInputButton
 					file={setAudioBlob}
 					key={'1'}
@@ -176,7 +187,7 @@ function ChatInput({ user }) {
 							viewBox='0 0 24 24'
 							strokeWidth={1.5}
 							stroke='currentColor'
-							className='w-6 h-6'>
+							className='w-6 h-6 scale-100 ease-linear duration-200 transition-all'>
 							<path
 								strokeLinecap='round'
 								strokeLinejoin='round'

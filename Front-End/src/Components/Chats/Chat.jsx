@@ -7,11 +7,19 @@ function Chat({ user, setSelectedChat }) {
 			onClick={() => setSelectedChat(user)}>
 			<div className='flex gap-4'>
 				<div className='flex flex-col justify-center'>
-					<img
-						className='w-12 h-12 p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500'
-						src={user.image}
-						alt='Bordered avatar'
-					/>
+					{user.image ? (
+						<img
+							className='w-12 h-12 p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500'
+							src={user.image}
+							alt='Bordered avatar'
+						/>
+					) : (
+						<img
+							className='w-12 h-12 p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500'
+							src='/default-avatar.jpg/'
+							alt='Bordered avatar'
+						/>
+					)}
 				</div>
 				<div>
 					<div>{user.firstName}</div>

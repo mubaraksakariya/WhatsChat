@@ -5,75 +5,44 @@ import NewChatButton from './NewChatButton';
 import { useNavigate } from 'react-router-dom';
 
 function Chats() {
-	const [db, setDB] = useState(null);
-	const [contacts, setContacts] = useState([]);
-	const [newContact, setNewContact] = useState({ name: '', email: '' });
+	const [contacts, setContacts] = useState(null);
 	const navigate = useNavigate();
 
 	const setSelectedChat = (user) => {
-		console.log(user);
 		navigate('/chat/', { state: { user } });
 	};
-	const users = [
-		{
-			id: 1,
-			firstName: 'user 1',
-			image: '/default-avatar.jpg/',
-			lastMessage: 'message',
-			lastSeen: '10:10 pm',
-			unread: true,
-		},
-		{
-			id: 2,
-			firstName: 'user 1',
-			image: '/default-avatar.jpg/',
-			lastMessage: 'message',
-			lastSeen: '10:10 pm',
-			unread: true,
-		},
-		{
-			id: 3,
-			firstName: 'user 1',
-			image: '/default-avatar.jpg/',
-			lastMessage: 'message',
-			lastSeen: '10:10 pm',
-			unread: true,
-		},
-		{
-			id: 4,
-			firstName: 'user 1',
-			image: '/default-avatar.jpg/',
-			lastMessage: 'message',
-			lastSeen: '10:10 pm',
-			unread: true,
-		},
-		{
-			id: 5,
-			firstName: 'user 1',
-			image: '/default-avatar.jpg/',
-			lastMessage: 'message',
-			lastSeen: '10:10 pm',
-			unread: true,
-		},
-		{
-			id: 6,
-			firstName: 'user 1',
-			image: '/default-avatar.jpg/',
-			lastMessage: 'message',
-			lastSeen: '10:10 pm',
-			unread: true,
-		},
-	];
+	useEffect(() => {
+		const openDB = indexedDB.open('WhatsChatDb', 1);
+
+		openDB.onerror = function (event) {
+			console.error('Error opening database');
+		};
+
+		openDB.onsuccess = function (event) {
+			const db = event.target.result;
+			const transaction = db.transaction(['contacts'], 'readonly');
+			const objectStore = transaction.objectStore('contacts');
+			const getAllContactsRequest = objectStore.getAll();
+			getAllContactsRequest.onsuccess = function (event) {
+				const result = event.target.result;
+				setContacts(result);
+			};
+			getAllContactsRequest.onerror = function (event) {
+				console.error('Error fetching contacts:', event.target.error);
+			};
+		};
+	}, []);
 
 	return (
 		<div className='chats-container'>
-			{users.map((user) => (
-				<Chat
-					user={user}
-					setSelectedChat={setSelectedChat}
-					key={user.id}
-				/>
-			))}
+			{contacts &&
+				contacts.map((user) => (
+					<Chat
+						user={user}
+						setSelectedChat={setSelectedChat}
+						key={user.id}
+					/>
+				))}
 			<div className=' absolute bottom-3 right-3'>
 				<NewChatButton />
 			</div>

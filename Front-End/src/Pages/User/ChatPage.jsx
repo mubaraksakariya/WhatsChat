@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ChatPageNav from '../../Components/Chats/Chatpage/ChatPageNav';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ChatItem from '../../Components/Chats/Chatpage/ChatItem';
@@ -8,24 +8,28 @@ function ChatPage() {
 	const location = useLocation();
 	const user = location.state.user;
 	const navigate = useNavigate();
+
 	useEffect(() => {
 		if (!user) navigate('');
 	}, []);
-	const chatItem = [
+
+	const [chatItem, setChatItem] = useState([
 		{
 			message:
 				'hey sdfhl a dsf hl dsfsd pfg fg df aa df ad a adsf dfsdfd a dasdfadsf ad',
 			from: 'self',
+			to: 'username',
 			time: '10:10',
 			status: 'read',
 		},
 		{
 			message: 'hi',
 			from: 'user',
+			to: 'self',
 			time: '10:11',
 			status: 'send',
 		},
-	];
+	]);
 	return (
 		<div className=' relative flex flex-col min-h-[100dvh] overflow-hidden'>
 			<div>
