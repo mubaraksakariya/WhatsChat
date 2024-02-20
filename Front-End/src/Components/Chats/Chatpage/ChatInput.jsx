@@ -5,11 +5,12 @@ import FileInput from './FileInput';
 import CameraInput from './CameraInput';
 import ChatMessageSendButton from './ChatMessageSendButton';
 import AudioInputButton from './AudioInputButton';
+import { addMessage } from '../../../HelperApi/MessageApi';
 
-function ChatInput({ user }) {
+function ChatInput({ user, setChatItem }) {
 	const [text, setText] = useState('');
 	const [attachment, setAttachment] = useState(null);
-	const [cameraImage, setCameraImage] = useState();
+	// const [cameraImage, setCameraImage] = useState();
 	const [audioBlob, setAudioBlob] = useState(null);
 
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -29,23 +30,78 @@ function ChatInput({ user }) {
 
 	useEffect(() => {
 		if (audioBlob) {
-			// const audioUrl = URL.createObjectURL(audioBlob);
-			// const audio = new Audio(audioUrl);
-			// audio.play();
-			console.log(audioBlob);
+			sendAudio();
 		}
 		if (text) {
 			console.log(text);
 		}
 		if (attachment) {
-			console.log(attachment);
+			inputRef.current.value = attachment[0].name;
+			inputRef.current.disabled = true;
+		} else {
+			inputRef.current.disabled = false;
 		}
-	}, [audioBlob, cameraImage, attachment]);
+	}, [audioBlob, attachment]);
 
 	const sendCameraImage = (image) => {
-		console.log(image);
-		setCameraImage(image);
-		console.log('image send');
+		// setCameraImage(image);
+		const message = {
+			type: 'image',
+			message: image,
+			from: 'self',
+			to: user,
+			time: new Date().toLocaleString(),
+			status: 'sending',
+		};
+		addMessage(message).then((newChatItem) => {
+			setChatItem((old) => [...old, newChatItem]);
+		});
+	};
+
+	const sendMessage = () => {
+		if (attachment) {
+			const message = {
+				type: 'attachment',
+				message: attachment,
+				from: 'self',
+				to: user,
+				time: new Date().toLocaleString(),
+				status: 'sending',
+			};
+			addMessage(message).then((newChatItem) => {
+				setChatItem((old) => [...old, newChatItem]);
+			});
+		}
+		setAttachment(null);
+		if (text) {
+			const message = {
+				type: 'text',
+				message: text,
+				from: 'self',
+				to: user,
+				time: new Date().toLocaleString(),
+				status: 'sending',
+			};
+			addMessage(message).then((newChatItem) => {
+				setChatItem((old) => [...old, newChatItem]);
+			});
+			setText('');
+		}
+	};
+
+	const sendAudio = () => {
+		const message = {
+			type: 'audio',
+			message: audioBlob,
+			from: 'self',
+			to: user,
+			time: new Date().toLocaleString(),
+			status: 'sending',
+		};
+		addMessage(message).then((newChatItem) => {
+			setChatItem((old) => [...old, newChatItem]);
+		});
+		setAudioBlob(null);
 	};
 
 	const handleClickOutside = (event) => {
@@ -83,11 +139,6 @@ function ChatInput({ user }) {
 		}
 	};
 
-	const sendMessage = () => {
-		if (attachment) console.log(attachment);
-		if (text) console.log(text);
-	};
-
 	return (
 		<div className='flex overflow-visible'>
 			<div
@@ -106,23 +157,24 @@ function ChatInput({ user }) {
 
 			<div className='flex w-full items-center rounded-full bg-themeBlueSecondary'>
 				{/* emoji picker button */}
-				<svg
-					onClick={emojiPickerToggle}
-					ref={emojibtnRef}
-					xmlns='http://www.w3.org/2000/svg'
-					fill='none'
-					viewBox='0 0 24 24'
-					strokeWidth={1.5}
-					stroke='currentColor'
-					className='w-6 h-6 mt-2 ms-2 mb-2 cursor-pointer'>
-					<path
-						strokeLinecap='round'
-						strokeLinejoin='round'
-						d='M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z'
-					/>
-				</svg>
-
-				{/*Input box  */}
+				{attachment == null && (
+					<svg
+						onClick={emojiPickerToggle}
+						ref={emojibtnRef}
+						xmlns='http://www.w3.org/2000/svg'
+						fill='none'
+						viewBox='0 0 24 24'
+						strokeWidth={1.5}
+						stroke='currentColor'
+						className='w-6 h-6 mt-2 ms-2 mb-2 cursor-pointer'>
+						<path
+							strokeLinecap='round'
+							strokeLinejoin='round'
+							d='M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z'
+						/>
+					</svg>
+				)}
+				{/*text Input box  */}
 				<div className='flex-1'>
 					<input
 						placeholder='Message'
@@ -140,11 +192,14 @@ function ChatInput({ user }) {
 
 				{/* Attachment icon and button, file input */}
 				<div className='mx-2'>
-					<FileInput setAttachment={setAttachment} />
+					<FileInput
+						setAttachment={setAttachment}
+						attachment={attachment}
+					/>
 				</div>
 
 				{/* Camera Icon and button */}
-				{text === '' && (
+				{text === '' && attachment == null && (
 					<div className='mx-2 me-4'>
 						<CameraInput
 							user={user}
@@ -153,7 +208,7 @@ function ChatInput({ user }) {
 					</div>
 				)}
 			</div>
-
+			{/* Audio input and send button */}
 			{text === '' && attachment == null ? (
 				<AudioInputButton
 					file={setAudioBlob}

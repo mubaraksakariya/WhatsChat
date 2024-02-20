@@ -3,6 +3,7 @@ import './Chats.css';
 import Chat from './Chat';
 import NewChatButton from './NewChatButton';
 import { useNavigate } from 'react-router-dom';
+import { getAllContacts } from '../../HelperApi/ContactApi';
 
 function Chats() {
 	const [contacts, setContacts] = useState(null);
@@ -12,25 +13,9 @@ function Chats() {
 		navigate('/chat/', { state: { user } });
 	};
 	useEffect(() => {
-		const openDB = indexedDB.open('WhatsChatDb', 1);
-
-		openDB.onerror = function (event) {
-			console.error('Error opening database');
-		};
-
-		openDB.onsuccess = function (event) {
-			const db = event.target.result;
-			const transaction = db.transaction(['contacts'], 'readonly');
-			const objectStore = transaction.objectStore('contacts');
-			const getAllContactsRequest = objectStore.getAll();
-			getAllContactsRequest.onsuccess = function (event) {
-				const result = event.target.result;
-				setContacts(result);
-			};
-			getAllContactsRequest.onerror = function (event) {
-				console.error('Error fetching contacts:', event.target.error);
-			};
-		};
+		getAllContacts().then((response) => {
+			setContacts(response);
+		});
 	}, []);
 
 	return (

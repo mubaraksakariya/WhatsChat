@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import NewChatNavBar from '../../Components/Chats/Newchat/NewChatNavBar';
 import NewContactButton from '../../Components/Chats/Newchat/NewContactButton';
 import { useNavigate } from 'react-router-dom';
-import { getAllContacts } from '../../Components/Contacts/ContactsApi';
 import Contact from '../../Components/Contacts/Contact';
+import { getAllContacts } from '../../HelperApi/ContactApi';
 
 function NewChat() {
 	const navigate = useNavigate();

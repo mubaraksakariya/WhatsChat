@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import NewContactNavBar from '../../Components/Chats/Newchat/NewContactNavBar';
 import { useNavigate } from 'react-router-dom';
-import {
-	addContact,
-	isEmailUnique,
-} from '../../Components/Contacts/ContactsApi';
+import { addContact, isEmailUnique } from '../../HelperApi/ContactApi';
+
 // import PhoneInput from 'react-phone-input-2';
 
 function NewContact() {
