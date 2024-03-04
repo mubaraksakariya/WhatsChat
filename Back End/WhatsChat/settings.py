@@ -28,9 +28,9 @@ ALLOWED_HOSTS = ['*']
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "http://192.168.0.106:5173",  # Add this line if applicable
+    "http://192.168.0.106:5173",  
     # Add other origins as needed
-    '*'
+    # '*'
 ]
 
 CORS_ALLOW_HEADERS = default_headers + (
@@ -59,8 +59,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'channels',
     'corsheaders',
-    'User', 
+    'User',
+    'Chat', 
 ]
 
 MIDDLEWARE = [

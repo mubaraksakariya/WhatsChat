@@ -181,6 +181,11 @@ function ChatInput({ user, setChatItem }) {
 						onChange={(event) => {
 							setText(event.target.value);
 						}}
+						onKeyDown={(event) => {
+							if (event.key === 'Enter' && text.trim() !== '') {
+								sendMessage();
+							}
+						}}
 						type='text'
 						className='w-full bg-transparent border-none focus:ring-transparent caret-themeGreen'
 						name=''

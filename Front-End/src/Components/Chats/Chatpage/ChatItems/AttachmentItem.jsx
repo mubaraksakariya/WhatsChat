@@ -3,10 +3,6 @@ import ChatItemBottomDetails from './ChatItemBottomDetails';
 
 function AttachmentItem({ chatItem }) {
 	const file = chatItem.message[0];
-	const manageDownload = (e) => {
-		e.preventDefault();
-		console.log(file);
-	};
 
 	// if the message is created by the user, print on the right side of the screen
 	if (chatItem.from === 'self') {
@@ -16,8 +12,8 @@ function AttachmentItem({ chatItem }) {
 					<div className=' text-center bg-themeBlueSecondary rounded-full py-3'>
 						<a
 							href={URL.createObjectURL(file)}
-							className=' cursor-pointer'
-							onClick={manageDownload}>
+							target='_blank'
+							className=' cursor-pointer'>
 							{chatItem.message[0].name}
 						</a>
 					</div>

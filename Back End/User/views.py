@@ -6,6 +6,7 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 import random
 from .models import CustomUser
+
 def generate_otp():
     otp = ''.join([str(random.randint(0, 9)) for _ in range(6)])
     return otp
@@ -33,12 +34,16 @@ def send_otp(to_email,otp):
 
 
 class CustomLogin(APIView):
-
+    # Manages sign up, gets email/phone and sends otp
     def post(self, request, *args, **kwargs):
         try:
             email = request.data.get('email')
             if email:
-                user, created = CustomUser.objects.get_or_create(email=email)
+                try:
+                    user, created = CustomUser.objects.get_or_create(email=email)
+                except Exception as e:
+                    print(e)
+                print('here')
                 otp = generate_otp()
                 user.otp = otp
                 user.save()
@@ -57,7 +62,7 @@ class CustomLogin(APIView):
                 'error': f'An error occurred: {str(e)}',
             }, status=500)
     
-
+    # Recieves otp from user and authenticates
     def put(self, request, *args, **kwargs):
         try:
             email = request.data.get('email')

@@ -107,5 +107,43 @@ const getAllMessages = async () => {
 	}
 };
 
+// Function to get paginated messages from the message store
+const getPaginatedMessages = (page, pageSize) => {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const db = await openDatabase();
+			const transaction = db.transaction(
+				[MESSAGE_STORE_NAME],
+				'readonly'
+			);
+			const store = transaction.objectStore(MESSAGE_STORE_NAME);
+
+			let messages = [];
+			let cursorIndex = 0;
+			const request = store.openCursor(null, 'prev');
+			request.onsuccess = (event) => {
+				const cursor = event.target.result;
+				if (cursor) {
+					if (cursorIndex >= (page - 1) * pageSize) {
+						messages.push(cursor.value);
+						// Resolve if we've reached the desired page size
+						if (messages.length >= pageSize) {
+							resolve(messages.reverse());
+							return;
+						}
+					}
+					cursor.continue();
+					cursorIndex++;
+				} else {
+					resolve(messages.reverse());
+				}
+			};
+		} catch (error) {
+			console.error('Error retrieving paginated messages:', error);
+			reject(error);
+		}
+	});
+};
+
 // Export the functions for external use
-export { addMessage, deleteMessage, getAllMessages };
+export { addMessage, deleteMessage, getAllMessages, getPaginatedMessages };
