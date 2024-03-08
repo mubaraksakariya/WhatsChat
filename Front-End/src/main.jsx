@@ -7,13 +7,13 @@ import { AuthProvider } from './Contexts/AuthContext.jsx';
 import { WebSocketProvider } from './Contexts/WebsocketContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-	<React.StrictMode>
-		<AxiosProvider>
-			<AuthProvider>
-				<WebSocketProvider>
-					<App />
-				</WebSocketProvider>
-			</AuthProvider>
-		</AxiosProvider>
-	</React.StrictMode>
+	// <React.StrictMode>
+	<AxiosProvider>
+		<AuthProvider>
+			<WebSocketProvider>
+				<App />
+			</WebSocketProvider>
+		</AuthProvider>
+	</AxiosProvider>
+	// </React.StrictMode>
 );

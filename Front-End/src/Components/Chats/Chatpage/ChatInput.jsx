@@ -6,18 +6,17 @@ import CameraInput from './CameraInput';
 import ChatMessageSendButton from './ChatMessageSendButton';
 import AudioInputButton from './AudioInputButton';
 import { addMessage } from '../../../HelperApi/MessageApi';
+import { useWebSocket } from '../../../Contexts/WebsocketContext';
 
 function ChatInput({ user, setChatItem }) {
 	const [text, setText] = useState('');
 	const [attachment, setAttachment] = useState(null);
-	// const [cameraImage, setCameraImage] = useState();
 	const [audioBlob, setAudioBlob] = useState(null);
-
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 	const parentDivRef = useRef(null);
 	const emojibtnRef = useRef(null);
 	const inputRef = useRef(null);
-
+	const socket = useWebSocket();
 	useEffect(() => {
 		// Add event listener when the component mounts
 		document.addEventListener('mousedown', handleClickOutside);
@@ -68,6 +67,7 @@ function ChatInput({ user, setChatItem }) {
 				time: new Date().toLocaleString(),
 				status: 'sending',
 			};
+			forwardMessageToWs(message);
 			addMessage(message).then((newChatItem) => {
 				setChatItem((old) => [...old, newChatItem]);
 			});
@@ -82,6 +82,7 @@ function ChatInput({ user, setChatItem }) {
 				time: new Date().toLocaleString(),
 				status: 'sending',
 			};
+			forwardMessageToWs(message);
 			addMessage(message).then((newChatItem) => {
 				setChatItem((old) => [...old, newChatItem]);
 			});
@@ -139,6 +140,15 @@ function ChatInput({ user, setChatItem }) {
 		}
 	};
 
+	// function to send the message to websocket
+	const forwardMessageToWs = (item) => {
+		if (socket.readyState === WebSocket.OPEN && item.type === 'text') {
+			console.log(item.type);
+			socket.send(JSON.stringify({ content: item }));
+		} else {
+			console.error('WebSocket connection not open.');
+		}
+	};
 	return (
 		<div className='flex overflow-visible'>
 			<div

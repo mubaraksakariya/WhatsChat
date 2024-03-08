@@ -6,33 +6,35 @@ function ChatScrollableDisplay({ chatItem, setChatItem }) {
 	const [pageNumber, setPageNumber] = useState(1);
 	const [endOfPage, setEndOfPage] = useState(false);
 	const [scrollToBottom, setScrollToBottom] = useState(true);
+	const [isScrollingToTop, setIsScrollingToTop] = useState(false); // Add state for scrolling to top
 	const chatContainerRef = useRef(null);
 	const topObserverRef = useRef(null);
 	const bottomObserverRef = useRef(null);
 
-	// observer api for the observer at the top
 	const options = {
 		threshold: 1,
 	};
+
 	useEffect(() => {
+		fetchMessages(1);
 		const observer = new IntersectionObserver(([entry]) => {
-			if (entry.isIntersecting) {
+			if (entry.isIntersecting && isScrollingToTop) {
+				// Check if scrolling to top
 				const chatContainer = chatContainerRef.current;
 				chatContainer.scrollTop += 35;
-
 				setPageNumber((prevPageNumber) => prevPageNumber + 1);
 				fetchMessages(pageNumber);
+				console.log(pageNumber);
 			}
 		}, options);
 
 		observer.observe(topObserverRef.current);
 
 		return () => {
-			observer.disconnect(); // Cleanup function to disconnect on unmount
+			observer.disconnect();
 		};
-	}, [{ threshold: 1 }]);
+	}, [isScrollingToTop]); // Update the dependency array
 
-	// observer api for the observer at the bottom
 	useEffect(() => {
 		const observer = new IntersectionObserver(([entry]) => {
 			if (entry.isIntersecting) {
@@ -45,17 +47,19 @@ function ChatScrollableDisplay({ chatItem, setChatItem }) {
 		observer.observe(bottomObserverRef.current);
 
 		return () => {
-			observer.disconnect(); // Cleanup function to disconnect on unmount
+			observer.disconnect();
 		};
-	}, [{ threshold: 0.5 }]);
+	}, []);
+
 	useEffect(() => {
 		if (scrollToBottom) {
 			const chatContainer = chatContainerRef.current;
 			if (chatContainer) {
-				chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom
+				chatContainer.scrollTop = chatContainer.scrollHeight;
 			}
 		}
 	}, [chatItem]);
+
 	const fetchMessages = async (nextPageNumber) => {
 		if (!endOfPage) {
 			const messages = await getPaginatedMessages(nextPageNumber, 5);
@@ -72,6 +76,15 @@ function ChatScrollableDisplay({ chatItem, setChatItem }) {
 		}
 	};
 
+	const handleScroll = () => {
+		const chatContainer = chatContainerRef.current;
+		if (chatContainer.scrollTop === 0) {
+			setIsScrollingToTop(true);
+		} else {
+			setIsScrollingToTop(false);
+		}
+	};
+
 	return (
 		<div
 			className={`
@@ -79,13 +92,15 @@ function ChatScrollableDisplay({ chatItem, setChatItem }) {
     transition duration-300 ease-in-out
     ${!scrollToBottom ? 'scroll-smooth' : ''}
   `}
-			ref={chatContainerRef}>
+			ref={chatContainerRef}
+			onScroll={handleScroll}>
 			{/* observer content for pagination help */}
-			{/* <div ref={topObserverRef}>Loading chat</div> */}
 			<div
 				role='status'
 				ref={topObserverRef}
-				className=' flex justify-center pb-4'>
+				className={`flex justify-center pb-4 ${
+					isScrollingToTop ? '' : 'hidden'
+				}`}>
 				<svg
 					aria-hidden='true'
 					className='w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600'
@@ -106,6 +121,11 @@ function ChatScrollableDisplay({ chatItem, setChatItem }) {
 			{chatItem.map((item) => {
 				return <ChatItem chatItem={item} key={item.id} />;
 			})}
+			{chatItem.length == 0 && (
+				<div className=' text-white flex flex-col justify-center items-center min-h-[70vh]'>
+					<div>Say 'Hello'</div>
+				</div>
+			)}
 			<div ref={bottomObserverRef}></div>
 		</div>
 	);

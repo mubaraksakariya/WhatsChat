@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ChatPageNav from '../../Components/Chats/Chatpage/ChatPageNav';
 import { useLocation, useNavigate } from 'react-router-dom';
-import ChatItem from '../../Components/Chats/Chatpage/ChatItem';
 import ChatInput from '../../Components/Chats/Chatpage/ChatInput';
-import { getPaginatedMessages } from '../../HelperApi/MessageApi';
 import ChatScrollableDisplay from '../../Components/Chats/Chatpage/ScrollablePart/ChatScrollableDisplay';
 
 function ChatPage() {
