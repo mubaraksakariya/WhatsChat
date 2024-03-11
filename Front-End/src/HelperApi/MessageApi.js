@@ -1,6 +1,6 @@
 // IndexedDB Configuration
 const DB_NAME = 'WhatsChatDb';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const MESSAGE_STORE_NAME = 'messages';
 
 // Function to open IndexedDB and return the database instance

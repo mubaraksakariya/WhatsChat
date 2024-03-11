@@ -9,7 +9,7 @@ function VerifyOtp() {
 	const axios = useAxios();
 	const navigate = useNavigate();
 	const [message, setMessage] = useState('');
-	const { login } = useAuth();
+	const { login, setLoggedInUser } = useAuth();
 	const onReset = () => {
 		let email = localStorage.getItem('email');
 		const data = {
@@ -34,6 +34,7 @@ function VerifyOtp() {
 				setMessage(response.data.message);
 				localStorage.setItem('token', response.data.token);
 				login();
+				setLoggedInUser(response.data.email);
 				navigate('/');
 			}
 			if (response.status === 200 && !response.data.result) {

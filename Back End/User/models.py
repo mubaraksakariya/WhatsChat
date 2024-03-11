@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
+from rest_framework import serializers
+
 
 class CustomUser(AbstractBaseUser):
     email = models.EmailField(unique=True)
@@ -14,10 +16,19 @@ class CustomUser(AbstractBaseUser):
 
     def __str__(self):
         return self.email
+class CustomUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'last_seen']
 
 class ConnectedUser(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     channel_name = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.user.email
+        return self.channel_name
+    
+class ConnectedUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConnectedUser
+        fields = ['id', 'user', 'channel_name']

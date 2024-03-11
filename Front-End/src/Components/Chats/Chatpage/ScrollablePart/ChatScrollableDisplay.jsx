@@ -62,7 +62,7 @@ function ChatScrollableDisplay({ chatItem, setChatItem }) {
 
 	const fetchMessages = async (nextPageNumber) => {
 		if (!endOfPage) {
-			const messages = await getPaginatedMessages(nextPageNumber, 5);
+			const messages = await getPaginatedMessages(nextPageNumber, 15);
 			if (messages.length === 0) {
 				setEndOfPage(true);
 			} else {
@@ -118,8 +118,8 @@ function ChatScrollableDisplay({ chatItem, setChatItem }) {
 				</svg>
 				<span className='sr-only'>Loading...</span>
 			</div>
-			{chatItem.map((item) => {
-				return <ChatItem chatItem={item} key={item.id} />;
+			{chatItem.map((item, index) => {
+				return <ChatItem chatItem={item} key={index} />;
 			})}
 			{chatItem.length == 0 && (
 				<div className=' text-white flex flex-col justify-center items-center min-h-[70vh]'>

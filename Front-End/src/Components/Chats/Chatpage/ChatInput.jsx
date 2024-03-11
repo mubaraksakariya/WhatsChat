@@ -7,6 +7,7 @@ import ChatMessageSendButton from './ChatMessageSendButton';
 import AudioInputButton from './AudioInputButton';
 import { addMessage } from '../../../HelperApi/MessageApi';
 import { useWebSocket } from '../../../Contexts/WebsocketContext';
+import { useAuth } from '../../../Contexts/AuthContext';
 
 function ChatInput({ user, setChatItem }) {
 	const [text, setText] = useState('');
@@ -17,6 +18,7 @@ function ChatInput({ user, setChatItem }) {
 	const emojibtnRef = useRef(null);
 	const inputRef = useRef(null);
 	const socket = useWebSocket();
+	const { loggedInUser } = useAuth();
 	useEffect(() => {
 		// Add event listener when the component mounts
 		document.addEventListener('mousedown', handleClickOutside);
@@ -61,8 +63,8 @@ function ChatInput({ user, setChatItem }) {
 		if (attachment) {
 			const message = {
 				type: 'attachment',
-				message: attachment,
-				from: 'self',
+				item: attachment,
+				// from: loggedInUser,
 				to: user,
 				time: new Date().toLocaleString(),
 				status: 'sending',
@@ -73,18 +75,20 @@ function ChatInput({ user, setChatItem }) {
 			});
 		}
 		setAttachment(null);
+
 		if (text) {
 			const message = {
 				type: 'text',
-				message: text,
-				from: 'self',
-				to: user,
+				text: text,
+				from: loggedInUser.email,
+				to: user.email,
 				time: new Date().toLocaleString(),
 				status: 'sending',
 			};
-			forwardMessageToWs(message);
+
 			addMessage(message).then((newChatItem) => {
 				setChatItem((old) => [...old, newChatItem]);
+				forwardMessageToWs(newChatItem);
 			});
 			setText('');
 		}
@@ -142,8 +146,11 @@ function ChatInput({ user, setChatItem }) {
 
 	// function to send the message to websocket
 	const forwardMessageToWs = (item) => {
-		if (socket.readyState === WebSocket.OPEN && item.type === 'text') {
-			console.log(item.type);
+		if (
+			(socket.readyState === WebSocket.OPEN && item.type === 'text') ||
+			item.type === 'typing'
+		) {
+			console.log(item.type + ' message send');
 			socket.send(JSON.stringify({ content: item }));
 		} else {
 			console.error('WebSocket connection not open.');
@@ -190,6 +197,13 @@ function ChatInput({ user, setChatItem }) {
 						placeholder='Message'
 						onChange={(event) => {
 							setText(event.target.value);
+							forwardMessageToWs({
+								type: 'typing',
+								item: 'the user is typing now',
+								to: user.email,
+								time: new Date().toLocaleString(),
+								// status: 'sending',
+							});
 						}}
 						onKeyDown={(event) => {
 							if (event.key === 'Enter' && text.trim() !== '') {

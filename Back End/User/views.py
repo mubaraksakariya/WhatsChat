@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 import random
-from .models import CustomUser
+from .models import CustomUser,ConnectedUser,ConnectedUserSerializer,CustomUserSerializer
 
 def generate_otp():
     otp = ''.join([str(random.randint(0, 9)) for _ in range(6)])
@@ -69,11 +69,11 @@ class CustomLogin(APIView):
             otp = request.data.get('otp')
             user, created = CustomUser.objects.get_or_create(email=email)
             if user.otp == otp:
-                print(user)
+                # print(user)
                 token, created = Token.objects.get_or_create(user=user)
                 return Response({
                     'message': 'The user is authenticated',
-                    'email': email,
+                    'email': user.email,
                     'result':True,
                     'token': token.key,
                 }, status=200)
@@ -87,5 +87,21 @@ class CustomLogin(APIView):
         except Exception as e:
             print({str(e)})
             return Response({
+                'error': f'An error occurred: {str(e)}',
+            }, status=500)
+
+class CurrentUser(APIView):
+    # to get the user profile of the logged in user
+    def get(self, request, *args, **kwargs):
+        try:
+            user = CustomUserSerializer(request.user).data
+            return Response({
+                'user': user,
+                'result': True,
+            }, status=200)
+        except Exception as e:
+            print(str(e))
+            return Response({
+                'result': False,
                 'error': f'An error occurred: {str(e)}',
             }, status=500)
