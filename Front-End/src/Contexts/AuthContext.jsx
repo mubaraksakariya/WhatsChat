@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
 		const checkAuthStatus = async () => {
 			setIsAuthenticated(token ? true : false);
 			axios.get('currentuser').then((response) => {
-				console.log(response.data);
+				// console.log(response.data);
 				if (response.data.result) setLoggedInUser(response.data.user);
 				else console.log(response.data.error);
 				setIsLoading(false);

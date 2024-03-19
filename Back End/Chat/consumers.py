@@ -16,11 +16,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         from User.models import ConnectedUser
-
-        connected_user = await sync_to_async(ConnectedUser.objects.get)(user=self.scope['user'])
-        if connected_user:
-            await sync_to_async(connected_user.delete)()
-            # print('connection closed')
+        try:
+            connected_user = await sync_to_async(ConnectedUser.objects.get)(user=self.scope['user'])
+            if connected_user:
+                await sync_to_async(connected_user.delete)()
+                # print('connection closed')
+        except Exception as e:
+            print(str(e))
 
     async def receive(self, text_data):
         # import is delayed because django may not be ready initially
@@ -55,7 +57,38 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'from': sender.email,
                     'acknowledgement_id':message['id'],
                 }
-                 
+            if type == 'acknowledgement':
+                message_to_forward={
+                    'type':type,
+                    'from': sender.email,
+                    'acknowledgement_id':message['acknowledgement_id'],
+                    'status':message['status'],
+                }
+            if type == 'attachment':
+                message_to_forward = {
+                    'type':type,
+                    'attachment': message['attachment'],
+                    'time':message['time'],
+                    'from': sender.email,
+                    'acknowledgement_id':message['id'],
+                }
+            if type == 'image':
+                message_to_forward = {
+                    'type':type,
+                    'image': message['image'],
+                    'time':message['time'],
+                    'from': sender.email,
+                    'acknowledgement_id':message['id'],
+                }
+            if type == 'audio':
+                print(message['audio'])
+                message_to_forward = {
+                    'type':type,
+                    'audio': message['audio'],
+                    'time':message['time'],
+                    'from': sender.email,
+                    'acknowledgement_id':message['id'],
+                }    
             # send the message
                 
             await self.channel_layer.send(
@@ -67,11 +100,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
         else:
-            await self.send(text_data=json.dumps({
-                'message': 'User is not online.',
-            }))
-            #forwarding failed
+             #forwarding failed because the user is offline
 
+            if message['type'] != 'typing' and message['type'] != 'acknowledgement':
+                message_to_forward = {
+                    'type': 'acknowledgement',
+                    'from': sender.email,
+                    'acknowledgement_id': message['id'],
+                    'status': 'error',
+                }
+                await self.send(text_data=json.dumps({'data':message_to_forward,}))
+
+
+           
             
     async def chat_message(self, event):
         message = event['message']

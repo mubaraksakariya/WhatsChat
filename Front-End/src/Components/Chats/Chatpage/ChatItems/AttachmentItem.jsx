@@ -1,34 +1,61 @@
 import React from 'react';
 import ChatItemBottomDetails from './ChatItemBottomDetails';
+import { useAuth } from '../../../../Contexts/AuthContext';
+import { dataURLtoBlob } from '../../../../HelperApi/FileConversions';
 
 function AttachmentItem({ chatItem }) {
-	const file = chatItem.message[0];
+	const downloadAttachment = (e) => {
+		e.preventDefault();
+		const blob = dataURLtoBlob(chatItem.attachment.data);
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = chatItem.attachment.filename;
+		document.body.appendChild(a);
+		a.click();
+		URL.revokeObjectURL(url);
+		document.body.removeChild(a);
+	};
 
-	// if the message is created by the user, print on the right side of the screen
-	if (chatItem.from === 'self') {
+	const { loggedInUser } = useAuth();
+
+	if (chatItem.from === loggedInUser.email) {
 		return (
-			<div className='flex justify-end px-3 py-2'>
+			<div
+				className='flex justify-end px-3 py-2'
+				title={chatItem.attachment.filename}>
 				<div className='max-w-[80%] min-w-[50%] bg-themChat1 text-themeText1 p-2 rounded-lg'>
-					<div className=' text-center bg-themeBlueSecondary rounded-full py-3'>
+					<div className='text-center bg-themeBlueSecondary rounded-full py-3'>
 						<a
-							href={URL.createObjectURL(file)}
-							target='_blank'
-							className=' cursor-pointer'>
-							{chatItem.message[0].name}
+							href='#'
+							onClick={downloadAttachment}
+							className='cursor-pointer truncate max-w-[80%] inline-block'
+							title={chatItem.attachment.filename} // Add title attribute for tooltip
+						>
+							{chatItem.attachment.filename}
 						</a>
 					</div>
+
 					<ChatItemBottomDetails chatItem={chatItem} />
 				</div>
 			</div>
 		);
 	} else {
 		return (
-			<div className='px-3 py-2'>
-				<div className='w-fit max-w-[70%] bg-themChat2 text-themeText1 p-2 rounded-lg'>
-					Attachment
-				</div>
-				<div className='text-xs flex justify-end items-end gap-2 text-themeText2'>
-					{chatItem.time}
+			<div
+				className='flex px-3 py-2'
+				title={chatItem.attachment.filename}>
+				<div className='max-w-[80%] min-w-[50%] bg-themChat1 text-themeText1 p-2 rounded-lg'>
+					<div className='text-center bg-themeBlueSecondary rounded-full py-3'>
+						<a
+							href='#'
+							onClick={downloadAttachment}
+							className='cursor-pointer truncate max-w-[80%] inline-block'
+							title={chatItem.attachment.filename} // Add title attribute for tooltip
+						>
+							{chatItem.attachment.filename}
+						</a>
+					</div>
 				</div>
 			</div>
 		);

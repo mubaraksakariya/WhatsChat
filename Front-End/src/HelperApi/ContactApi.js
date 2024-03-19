@@ -1,5 +1,5 @@
 const DB_NAME = 'WhatsChatDb';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const CONTACT_STORE_NAME = 'contacts';
 
 // Function to open IndexedDB and return the database instance

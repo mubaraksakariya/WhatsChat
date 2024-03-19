@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { getPaginatedMessages } from '../../../../HelperApi/MessageApi';
 import ChatItem from '../ChatItem';
+import { useAuth } from '../../../../Contexts/AuthContext';
 
-function ChatScrollableDisplay({ chatItem, setChatItem }) {
+function ChatScrollableDisplay({ chatItem, setChatItem, user }) {
 	const [pageNumber, setPageNumber] = useState(1);
 	const [endOfPage, setEndOfPage] = useState(false);
 	const [scrollToBottom, setScrollToBottom] = useState(true);
@@ -10,7 +11,7 @@ function ChatScrollableDisplay({ chatItem, setChatItem }) {
 	const chatContainerRef = useRef(null);
 	const topObserverRef = useRef(null);
 	const bottomObserverRef = useRef(null);
-
+	const { loggedInUser } = useAuth();
 	const options = {
 		threshold: 1,
 	};
@@ -62,7 +63,13 @@ function ChatScrollableDisplay({ chatItem, setChatItem }) {
 
 	const fetchMessages = async (nextPageNumber) => {
 		if (!endOfPage) {
-			const messages = await getPaginatedMessages(nextPageNumber, 15);
+			const messages = await getPaginatedMessages(
+				nextPageNumber,
+				15,
+				loggedInUser,
+				user
+			);
+			// console.log(messages);
 			if (messages.length === 0) {
 				setEndOfPage(true);
 			} else {

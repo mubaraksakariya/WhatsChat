@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 function ChatItemBottomDetails({ chatItem }) {
 	return (
 		<div className='text-xs flex justify-end items-end gap-2 text-themeText2'>
 			{chatItem.time}
-			{chatItem.status === 'send' && (
+			{chatItem.status === 'error' && (
 				<svg
 					xmlns='http://www.w3.org/2000/svg'
 					viewBox='0 0 20 20'

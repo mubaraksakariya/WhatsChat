@@ -28,16 +28,23 @@ function ChatInput({ user, setChatItem }) {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
 	}, []);
-
+	// to disable input field , to send audio
 	useEffect(() => {
 		if (audioBlob) {
 			sendAudio();
 		}
-		if (text) {
-			console.log(text);
-		}
-		if (attachment) {
-			inputRef.current.value = attachment[0].name;
+
+		if (attachment && attachment.length > 0) {
+			const count = attachment.length - 1;
+			if (count == 1) {
+				inputRef.current.value =
+					attachment[0].name + ' and ' + count + ' other file';
+			} else if (count > 1) {
+				inputRef.current.value =
+					attachment[0].name + ' and ' + count + ' other files';
+			} else {
+				inputRef.current.value = attachment[0].name;
+			}
 			inputRef.current.disabled = true;
 		} else {
 			inputRef.current.disabled = false;
@@ -46,35 +53,54 @@ function ChatInput({ user, setChatItem }) {
 
 	const sendCameraImage = (image) => {
 		// setCameraImage(image);
-		const message = {
-			type: 'image',
-			message: image,
-			from: 'self',
-			to: user,
-			time: new Date().toLocaleString(),
-			status: 'sending',
-		};
-		addMessage(message).then((newChatItem) => {
-			setChatItem((old) => [...old, newChatItem]);
-		});
-	};
-
-	const sendMessage = () => {
-		if (attachment) {
+		const reader = new FileReader();
+		reader.onload = () => {
 			const message = {
-				type: 'attachment',
-				item: attachment,
-				// from: loggedInUser,
-				to: user,
+				type: 'image',
+				image: {
+					image: reader.result,
+					caption: image.caption,
+				},
+				from: loggedInUser.email,
+				to: user.email,
 				time: new Date().toLocaleString(),
 				status: 'sending',
 			};
-			forwardMessageToWs(message);
 			addMessage(message).then((newChatItem) => {
 				setChatItem((old) => [...old, newChatItem]);
+				socket.forwardToWebSocket(newChatItem);
 			});
+		};
+		reader.readAsDataURL(image.image);
+	};
+
+	const sendMessage = () => {
+		// for attachments,
+		if (attachment && attachment.length > 0) {
+			attachment.forEach((file) => {
+				const reader = new FileReader();
+				reader.onload = () => {
+					const message = {
+						type: 'attachment',
+						attachment: {
+							data: reader.result,
+							filename: file.name,
+							type: file.type,
+						},
+						from: loggedInUser.email,
+						to: user.email,
+						time: new Date().toLocaleString(),
+						status: 'sending',
+					};
+					addMessage(message).then((newChatItem) => {
+						setChatItem((old) => [...old, newChatItem]);
+						socket.forwardToWebSocket(newChatItem);
+					});
+				};
+				reader.readAsDataURL(file);
+			});
+			setAttachment([]);
 		}
-		setAttachment(null);
 
 		if (text) {
 			const message = {
@@ -88,24 +114,29 @@ function ChatInput({ user, setChatItem }) {
 
 			addMessage(message).then((newChatItem) => {
 				setChatItem((old) => [...old, newChatItem]);
-				forwardMessageToWs(newChatItem);
+				socket.forwardToWebSocket(newChatItem);
 			});
 			setText('');
 		}
 	};
 
 	const sendAudio = () => {
-		const message = {
-			type: 'audio',
-			message: audioBlob,
-			from: 'self',
-			to: user,
-			time: new Date().toLocaleString(),
-			status: 'sending',
+		const reader = new FileReader();
+		reader.onload = () => {
+			const message = {
+				type: 'audio',
+				audio: reader.result,
+				from: loggedInUser.email,
+				to: user.email,
+				time: new Date().toLocaleString(),
+				status: 'sending',
+			};
+			addMessage(message).then((newChatItem) => {
+				setChatItem((old) => [...old, newChatItem]);
+				socket.forwardToWebSocket(newChatItem);
+			});
 		};
-		addMessage(message).then((newChatItem) => {
-			setChatItem((old) => [...old, newChatItem]);
-		});
+		reader.readAsDataURL(audioBlob);
 		setAudioBlob(null);
 	};
 
@@ -144,18 +175,6 @@ function ChatInput({ user, setChatItem }) {
 		}
 	};
 
-	// function to send the message to websocket
-	const forwardMessageToWs = (item) => {
-		if (
-			(socket.readyState === WebSocket.OPEN && item.type === 'text') ||
-			item.type === 'typing'
-		) {
-			console.log(item.type + ' message send');
-			socket.send(JSON.stringify({ content: item }));
-		} else {
-			console.error('WebSocket connection not open.');
-		}
-	};
 	return (
 		<div className='flex overflow-visible'>
 			<div
@@ -197,7 +216,7 @@ function ChatInput({ user, setChatItem }) {
 						placeholder='Message'
 						onChange={(event) => {
 							setText(event.target.value);
-							forwardMessageToWs({
+							socket.forwardToWebSocket({
 								type: 'typing',
 								item: 'the user is typing now',
 								to: user.email,

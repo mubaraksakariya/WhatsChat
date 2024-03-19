@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 
 function FileInput({ setAttachment, attachment }) {
 	const fileRef = useRef();

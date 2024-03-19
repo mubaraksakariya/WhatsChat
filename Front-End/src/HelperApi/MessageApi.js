@@ -108,7 +108,7 @@ const getAllMessages = async () => {
 };
 
 // Function to get paginated messages from the message store
-const getPaginatedMessages = (page, pageSize) => {
+const getPaginatedMessages = (page, pageSize, loggedInUser, user) => {
 	return new Promise(async (resolve, reject) => {
 		try {
 			const db = await openDatabase();
@@ -117,23 +117,28 @@ const getPaginatedMessages = (page, pageSize) => {
 				'readonly'
 			);
 			const store = transaction.objectStore(MESSAGE_STORE_NAME);
-
 			let messages = [];
 			let cursorIndex = 0;
 			const request = store.openCursor(null, 'prev');
 			request.onsuccess = (event) => {
 				const cursor = event.target.result;
 				if (cursor) {
-					if (cursorIndex >= (page - 1) * pageSize) {
-						messages.push(cursor.value);
-						// Resolve if we've reached the desired page size
-						if (messages.length >= pageSize) {
-							resolve(messages.reverse());
-							return;
+					const message = cursor.value;
+					if (
+						message.to === user.email ||
+						message.from === user.email
+					) {
+						if (cursorIndex >= (page - 1) * pageSize) {
+							messages.push(message);
+							// Resolve if we've reached the desired page size
+							if (messages.length >= pageSize) {
+								resolve(messages.reverse());
+								return;
+							}
 						}
+						cursorIndex++;
 					}
 					cursor.continue();
-					cursorIndex++;
 				} else {
 					resolve(messages.reverse());
 				}
@@ -145,5 +150,46 @@ const getPaginatedMessages = (page, pageSize) => {
 	});
 };
 
+// Function to update the status of a message in the message store
+const updateStatus = async (messageId, status) => {
+	try {
+		const db = await openDatabase();
+		const transaction = db.transaction([MESSAGE_STORE_NAME], 'readwrite');
+		const store = transaction.objectStore(MESSAGE_STORE_NAME);
+
+		const getRequest = store.get(messageId);
+		getRequest.onsuccess = (event) => {
+			const message = event.target.result;
+			if (message) {
+				message.status = status;
+				const updateRequest = store.put(message);
+				// updateRequest.onsuccess = () => {
+				// 	console.log('Message status updated successfully');
+				// };
+				updateRequest.onerror = (event) => {
+					console.error(
+						'Error updating message status:',
+						event.target.error
+					);
+				};
+			} else {
+				console.error('Message not found');
+			}
+		};
+		getRequest.onerror = (event) => {
+			console.error('Error retrieving message:', event.target.error);
+		};
+	} catch (error) {
+		console.error('Error updating message status:', error);
+		throw error;
+	}
+};
+
 // Export the functions for external use
-export { addMessage, deleteMessage, getAllMessages, getPaginatedMessages };
+export {
+	addMessage,
+	deleteMessage,
+	getAllMessages,
+	getPaginatedMessages,
+	updateStatus,
+};
