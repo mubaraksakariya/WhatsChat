@@ -1,3 +1,4 @@
+// Function to convert base64 string to Blob object
 const dataURLtoBlob = (dataURL) => {
 	const parts = dataURL.split(';base64,');
 	const contentType = parts[0].split(':')[1];

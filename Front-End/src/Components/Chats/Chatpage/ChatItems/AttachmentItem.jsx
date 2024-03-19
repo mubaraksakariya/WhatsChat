@@ -1,9 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ChatItemBottomDetails from './ChatItemBottomDetails';
 import { useAuth } from '../../../../Contexts/AuthContext';
 import { dataURLtoBlob } from '../../../../HelperApi/FileConversions';
+import { updateStatusToSeen } from '../../../../HelperApi/WebSocketMessageHelper';
 
 function AttachmentItem({ chatItem }) {
+	useEffect(() => {
+		if (
+			chatItem.status !== 'seen' &&
+			chatItem.from !== loggedInUser.email
+		) {
+			updateStatusToSeen(chatItem);
+		}
+	}, []);
 	const downloadAttachment = (e) => {
 		e.preventDefault();
 		const blob = dataURLtoBlob(chatItem.attachment.data);

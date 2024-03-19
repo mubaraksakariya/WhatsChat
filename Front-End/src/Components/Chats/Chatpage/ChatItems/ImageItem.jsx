@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ChatItemBottomDetails from './ChatItemBottomDetails';
 import { useAuth } from '../../../../Contexts/AuthContext';
 import { dataURLtoBlob } from '../../../../HelperApi/FileConversions';
+import { updateStatusToSeen } from '../../../../HelperApi/WebSocketMessageHelper';
 
 function ImageItem({ chatItem }) {
 	const [imageBlob, setImageBlob] = useState();
@@ -9,6 +10,12 @@ function ImageItem({ chatItem }) {
 	useEffect(() => {
 		const blob = dataURLtoBlob(chatItem.image.image);
 		setImageBlob(blob);
+		if (
+			chatItem.status !== 'seen' &&
+			chatItem.from !== loggedInUser.email
+		) {
+			updateStatusToSeen(chatItem);
+		}
 	}, [chatItem]);
 
 	// if the message is created by the user, print on the right side of the screen

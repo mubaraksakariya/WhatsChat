@@ -81,7 +81,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'acknowledgement_id':message['id'],
                 }
             if type == 'audio':
-                print(message['audio'])
                 message_to_forward = {
                     'type':type,
                     'audio': message['audio'],

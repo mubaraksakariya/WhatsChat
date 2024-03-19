@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
-import { manageIncomingMessage } from '../HelperApi/WebSocketMessageReciever';
+import { manageIncomingMessage } from '../HelperApi/WebSocketMessageHelper';
 
 const WebSocketContext = createContext(null);
 let socketState;

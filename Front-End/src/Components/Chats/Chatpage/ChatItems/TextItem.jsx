@@ -1,12 +1,18 @@
 import React, { useEffect } from 'react';
 import ChatItemBottomDetails from './ChatItemBottomDetails';
 import { useAuth } from '../../../../Contexts/AuthContext';
+import { updateStatusToSeen } from '../../../../HelperApi/WebSocketMessageHelper';
 
 function TextItem({ chatItem }) {
 	const { loggedInUser } = useAuth();
-	// useEffect(() => {
-	// 	console.log(loggedInUser);
-	// }, []);
+	useEffect(() => {
+		if (
+			chatItem.status !== 'seen' &&
+			chatItem.from !== loggedInUser.email
+		) {
+			updateStatusToSeen(chatItem);
+		}
+	}, []);
 	if (loggedInUser && chatItem.from === loggedInUser.email) {
 		return (
 			<div className=' flex justify-end px-3 py-2'>

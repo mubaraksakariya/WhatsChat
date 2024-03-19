@@ -1,8 +1,9 @@
 import { setIsTyping } from '../Components/Chats/Chatpage/ChatPageUser';
 import { socket } from '../Contexts/WebsocketContext';
-import { addMessage, updateStatus } from '../HelperApi/MessageApi';
+import { addMessage, updateStatus } from './MessageApi';
 import { chatItem, setChatItem } from '../Pages/User/ChatPage';
 
+// distribute incoming message
 const manageIncomingMessage = (message) => {
 	if (message.type === 'typing') {
 		setIsTyping(true);
@@ -31,6 +32,7 @@ const manageIncomingMessage = (message) => {
 	}
 };
 
+// update the status to be read
 const updateMessageStatus = (message) => {
 	const messageId = message.acknowledgement_id;
 	const status = message.status;
@@ -51,21 +53,15 @@ const updateMessageStatus = (message) => {
 	}
 };
 
-// Function to convert base64 string to Blob object
-function b64toBlob(b64Data, contentType = '', sliceSize = 512) {
-	const byteCharacters = atob(b64Data);
-	const byteArrays = [];
-	for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-		const slice = byteCharacters.slice(offset, offset + sliceSize);
-		const byteNumbers = new Array(slice.length);
-		for (let i = 0; i < slice.length; i++) {
-			byteNumbers[i] = slice.charCodeAt(i);
-		}
-		const byteArray = new Uint8Array(byteNumbers);
-		byteArrays.push(byteArray);
-	}
-	const blob = new Blob(byteArrays, { type: contentType });
-	return blob;
-}
-
-export { manageIncomingMessage };
+// update the message to be seen
+const updateStatusToSeen = (message) => {
+	const acknowledgement = {
+		type: 'acknowledgement',
+		acknowledgement_id: message.acknowledgement_id,
+		status: 'seen',
+		to: message.from,
+	};
+	socket.forwardToWebSocket(acknowledgement);
+	updateStatus(message.id, 'seen');
+};
+export { manageIncomingMessage, updateMessageStatus, updateStatusToSeen };
