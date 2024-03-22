@@ -15,15 +15,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # print(f'connected {self.channel_name}')
 
     async def disconnect(self, close_code):
-        from User.models import ConnectedUser
+        from User.models import ConnectedUser, CustomUser
+        from django.utils import timezone
+
         try:
             connected_user = await sync_to_async(ConnectedUser.objects.get)(user=self.scope['user'])
             if connected_user:
                 await sync_to_async(connected_user.delete)()
-                # print('connection closed')
+                custom_user = await sync_to_async(CustomUser.objects.get)(id=connected_user.user_id)
+                custom_user.last_seen = timezone.now()
+                await sync_to_async(custom_user.save)()
+        except ConnectedUser.DoesNotExist:
+            print('no connected user found')
         except Exception as e:
             print(str(e))
 
+            
     async def receive(self, text_data):
         # import is delayed because django may not be ready initially
         from User.models import ConnectedUser 

@@ -105,3 +105,26 @@ class CurrentUser(APIView):
                 'result': False,
                 'error': f'An error occurred: {str(e)}',
             }, status=500)
+        
+
+class UserDetails(APIView):
+    def get(self, request, *args, **kwargs):
+        email = kwargs.get('email')
+        print(email)
+        try:
+            user = CustomUser.objects.get(email=email)
+            is_online = ConnectedUser.objects.filter(user=user).exists()
+            user = CustomUserSerializer(user).data
+            return Response({
+                'user': user,
+                'is_online':is_online,
+                'result': True,
+            }, status=200)
+        except CustomUser.DoesNotExist:
+            return Response({
+                'result': False,
+                'message': 'User not found',
+            }, status=201)
+        except Exception as e:
+            print(str(e))
+            return Response({'message': str(e)}, status=500)

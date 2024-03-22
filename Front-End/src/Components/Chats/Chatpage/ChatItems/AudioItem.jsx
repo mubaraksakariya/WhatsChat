@@ -24,7 +24,7 @@ function AudioItem({ chatItem }) {
 	}, [chatItem]);
 
 	// if the message is created by the user, print on the right side of the screen
-	if (chatItem.from === loggedInUser.email) {
+	if (loggedInUser && chatItem.from === loggedInUser.email) {
 		return (
 			<div className='flex justify-end px-3 py-2'>
 				<div className='max-w-[80%] min-w-[70%] bg-themChat1 text-themeText1 p-2 rounded-lg'>

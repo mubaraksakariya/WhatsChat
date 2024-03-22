@@ -16,7 +16,7 @@ function ChatPageNav({ user }) {
 	};
 
 	return (
-		<div className='flex justify-between bg-themeBlueSecondary  py-7 px-5 text-warmGray-300'>
+		<div className='flex justify-between bg-themeBlueSecondary  py-7 px-5 text-warmGray-300 relative'>
 			<div className='flex items-center gap-3'>
 				{/* back button */}
 				<div className='cursor-pointer' onClick={() => navigate('/')}>

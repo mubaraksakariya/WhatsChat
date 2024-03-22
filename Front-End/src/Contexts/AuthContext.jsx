@@ -28,8 +28,8 @@ export const AuthProvider = ({ children }) => {
 				else console.log(response.data.error);
 				setIsLoading(false);
 			});
-			// setIsLoading(false);
 		};
+		setIsLoading(false);
 		checkAuthStatus();
 	}, [token]);
 

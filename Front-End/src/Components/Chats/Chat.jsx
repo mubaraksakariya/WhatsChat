@@ -22,12 +22,12 @@ function Chat({ user, setSelectedChat }) {
 					)}
 				</div>
 				<div>
-					<div>{user.firstName}</div>
-					<div>{user.lastMessage}</div>
+					<div>{user.first_name}</div>
+					<div>{user.last_message}</div>
 				</div>
 			</div>
 			<div>
-				<div>{user.lastSeen}</div>
+				<div>{user.last_seen}</div>
 				<div>{user.unread && '*'}</div>
 			</div>
 		</div>

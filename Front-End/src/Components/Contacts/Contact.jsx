@@ -18,7 +18,7 @@ function Contact({ contact, setSelectedContact }) {
 					/>
 				</div>
 				<div className='flex flex-col justify-center'>
-					<div>{contact.firstName}</div>
+					<div>{contact.first_name}</div>
 					{/* <div>{user.lastMessage}</div> */}
 				</div>
 			</div>

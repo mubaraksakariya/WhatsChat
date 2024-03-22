@@ -19,16 +19,16 @@ function NewContact() {
 	const manageSubmit = async (e) => {
 		e.preventDefault();
 		setError('');
-		const firstName = e.target.elements.firstname.value;
-		const lastName = e.target.elements.lastname.value;
+		const first_name = e.target.elements.firstname.value;
+		const last_name = e.target.elements.lastname.value;
 		const email = e.target.elements.email.value;
 		if (!validateEmail(email)) {
 			setError('Please enter a valid email address.');
 			return;
 		}
 		const data = {
-			firstName,
-			lastName,
+			first_name,
+			last_name,
 			email,
 		};
 		try {

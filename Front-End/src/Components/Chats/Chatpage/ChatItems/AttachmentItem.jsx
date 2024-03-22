@@ -28,7 +28,7 @@ function AttachmentItem({ chatItem }) {
 
 	const { loggedInUser } = useAuth();
 
-	if (chatItem.from === loggedInUser.email) {
+	if (loggedInUser && chatItem.from === loggedInUser.email) {
 		return (
 			<div
 				className='flex justify-end px-3 py-2'
