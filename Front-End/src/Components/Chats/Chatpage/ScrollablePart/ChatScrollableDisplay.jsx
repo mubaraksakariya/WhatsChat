@@ -96,7 +96,7 @@ function ChatScrollableDisplay({ chatItem, setChatItem, user }) {
 		<div
 			className={`
     flex-1 max-h-[80%] overflow-auto
-    transition duration-300 ease-in-out
+    transition duration-300 ease-in-out pt-10
     ${!scrollToBottom ? 'scroll-smooth' : ''}
   `}
 			ref={chatContainerRef}
