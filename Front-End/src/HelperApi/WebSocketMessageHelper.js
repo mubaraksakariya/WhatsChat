@@ -65,8 +65,9 @@ const updateStatusToSeen = (message) => {
 	updateStatus(message.id, 'seen');
 };
 const retrySendingMessage = (message) => {
-	console.log(message);
+	socket.forwardToWebSocket(message);
 };
+
 export {
 	manageIncomingMessage,
 	updateMessageStatus,

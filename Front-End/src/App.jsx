@@ -8,11 +8,12 @@ import HomePage from './Pages/User/HomePage';
 import VerifyOtp from './Pages/User/VerifyOtp';
 import Admin from './Pages/Admin/Admin';
 import SignUp from './Pages/User/SignUp';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from './Contexts/AuthContext';
 import NewChat from './Pages/User/NewChat';
 import NewContact from './Pages/User/NewContact';
 import ChatPage from './Pages/User/ChatPage';
+import { ConfirmationProvider } from './Contexts/ConfirmationContext';
 
 function App() {
 	const [isDark, setIsDark] = useState(false);
@@ -93,8 +94,9 @@ function App() {
 			<div className={isDark ? 'dark' : ''}>
 				<div className=' min-h-screen bg-black flex justify-center  items-center'>
 					<div className='w-screen max-w-lg  bg-themeBlue  min-h-screen flex justify-center  items-center'>
-						{/*  flex justify-center  items-center is removed from classNames */}
-						<RouterProvider router={router} />
+						<ConfirmationProvider>
+							<RouterProvider router={router} />
+						</ConfirmationProvider>
 					</div>
 				</div>
 			</div>

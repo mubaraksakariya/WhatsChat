@@ -6,6 +6,7 @@ import { useWebSocket } from '../../../../Contexts/WebsocketContext';
 import { updateStatusToSeen } from '../../../../HelperApi/WebSocketMessageHelper';
 import DropDownMenu from './DropDown/DropDownMenu';
 import DropDownToggler from './DropDown/DropDownToggler';
+import DeletedChatItem from '../DeletedChatItem';
 
 function AudioItem({ chatItem }) {
 	const [audioUrl, setAudioUrl] = useState(null);
@@ -13,26 +14,31 @@ function AudioItem({ chatItem }) {
 	const [isMenuButtonVisible, setIsMenuButtonVisible] = useState(false);
 	const [isDropDown, setIsDropDown] = useState(false);
 	const socket = useWebSocket();
+	const [message, setMessage] = useState(chatItem);
 
 	useEffect(() => {
-		const blob = dataURLtoBlob(chatItem.audio);
+		const blob = dataURLtoBlob(message.audio);
 		setAudioUrl(URL.createObjectURL(blob));
 		// to update the message status to 'seen'
-		if (
-			chatItem.status !== 'seen' &&
-			chatItem.from !== loggedInUser.email
-		) {
-			updateStatusToSeen(chatItem);
+		if (message.status !== 'seen' && message.from !== loggedInUser.email) {
+			updateStatusToSeen(message);
 		}
-	}, [chatItem]);
+	}, [message]);
 
+	const toggleDropDownMenu = () => {
+		setIsDropDown((old) => !old);
+		toggleMenuButtonApprearance();
+	};
 	const toggleMenuButtonApprearance = () => {
 		setIsMenuButtonVisible((old) => !old);
 		setIsDropDown(false);
 	};
 
-	// if the message is created by the user, print on the right side of the screen
-	if (loggedInUser && chatItem.from === loggedInUser.email) {
+	if (
+		loggedInUser &&
+		message.from === loggedInUser.email &&
+		message.is_deleted !== true
+	) {
 		return (
 			<div className='flex justify-end px-3 py-2'>
 				<div
@@ -45,8 +51,9 @@ function AudioItem({ chatItem }) {
 					{isDropDown && (
 						<div className='absolute top-0 bottom-0 right-0  z-10 px-3 '>
 							<DropDownMenu
-								chatItem={chatItem}
-								isDropDown={isDropDown}
+								message={message}
+								setMessage={setMessage}
+								toggleDropDownMenu={toggleDropDownMenu}
 							/>
 						</div>
 					)}
@@ -56,11 +63,15 @@ function AudioItem({ chatItem }) {
 							Your browser does not support the audio tag.
 						</audio>
 					)}
-					<ChatItemBottomDetails chatItem={chatItem} />
+					<ChatItemBottomDetails message={message} />
 				</div>
 			</div>
 		);
-	} else {
+	} else if (
+		loggedInUser &&
+		message.from !== loggedInUser.email &&
+		message.is_deleted !== true
+	) {
 		return (
 			<div className='px-3 py-2'>
 				<div
@@ -73,8 +84,9 @@ function AudioItem({ chatItem }) {
 					{isDropDown && (
 						<div className='absolute top-0 bottom-0 left-0  z-10 px-3 '>
 							<DropDownMenu
-								chatItem={chatItem}
-								isDropDown={isDropDown}
+								message={message}
+								setMessage={setMessage}
+								toggleDropDownMenu={toggleDropDownMenu}
 							/>
 						</div>
 					)}
@@ -85,12 +97,12 @@ function AudioItem({ chatItem }) {
 						</audio>
 					)}
 					<div className='text-xs flex justify-end items-end gap-2 text-themeText2 pt-2'>
-						{chatItem.time}
+						{message.time}
 					</div>
 				</div>
 			</div>
 		);
-	}
+	} else return <DeletedChatItem message={message} />;
 }
 
 export default AudioItem;

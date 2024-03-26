@@ -5,42 +5,49 @@ import { dataURLtoBlob } from '../../../../HelperApi/FileConversions';
 import { updateStatusToSeen } from '../../../../HelperApi/WebSocketMessageHelper';
 import DropDownMenu from './DropDown/DropDownMenu';
 import DropDownToggler from './DropDown/DropDownToggler';
+import DeletedChatItem from '../DeletedChatItem';
 
 function AttachmentItem({ chatItem }) {
 	const [isMenuButtonVisible, setIsMenuButtonVisible] = useState(false);
 	const [isDropDown, setIsDropDown] = useState(false);
 	const { loggedInUser } = useAuth();
+	const [message, setMessage] = useState(chatItem);
 
 	useEffect(() => {
-		if (
-			chatItem.status !== 'seen' &&
-			chatItem.from !== loggedInUser.email
-		) {
-			updateStatusToSeen(chatItem);
+		if (message.status !== 'seen' && message.from !== loggedInUser.email) {
+			updateStatusToSeen(message);
 		}
 	}, []);
 	const downloadAttachment = (e) => {
 		e.preventDefault();
-		const blob = dataURLtoBlob(chatItem.attachment.data);
+		const blob = dataURLtoBlob(message.attachment.data);
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = chatItem.attachment.filename;
+		a.download = message.attachment.filename;
 		document.body.appendChild(a);
 		a.click();
 		URL.revokeObjectURL(url);
 		document.body.removeChild(a);
+	};
+	const toggleDropDownMenu = () => {
+		setIsDropDown((old) => !old);
+		toggleMenuButtonApprearance();
 	};
 	const toggleMenuButtonApprearance = () => {
 		setIsMenuButtonVisible((old) => !old);
 		setIsDropDown(false);
 	};
 
-	if (loggedInUser && chatItem.from === loggedInUser.email) {
+	if (
+		loggedInUser &&
+		message.from === loggedInUser.email &&
+		message.is_deleted !== true
+	) {
 		return (
 			<div
 				className='flex justify-end px-3 py-2'
-				title={chatItem.attachment.filename}>
+				title={message.attachment.filename}>
 				<div
 					className='max-w-[80%] min-w-[50%] bg-themChat1 text-themeText1 p-2 rounded-lg relative'
 					onMouseEnter={toggleMenuButtonApprearance}
@@ -51,8 +58,9 @@ function AttachmentItem({ chatItem }) {
 					{isDropDown && (
 						<div className='absolute top-0 bottom-0 right-0  z-10 px-3 '>
 							<DropDownMenu
-								chatItem={chatItem}
-								isDropDown={isDropDown}
+								message={message}
+								setMessage={setMessage}
+								toggleDropDownMenu={toggleDropDownMenu}
 							/>
 						</div>
 					)}
@@ -61,21 +69,23 @@ function AttachmentItem({ chatItem }) {
 							href='#'
 							onClick={downloadAttachment}
 							className='cursor-pointer truncate max-w-[80%] inline-block'
-							title={chatItem.attachment.filename} // Add title attribute for tooltip
+							title={message.attachment.filename} // Add title attribute for tooltip
 						>
-							{chatItem.attachment.filename}
+							{message.attachment.filename}
 						</a>
 					</div>
 
-					<ChatItemBottomDetails chatItem={chatItem} />
+					<ChatItemBottomDetails message={message} />
 				</div>
 			</div>
 		);
-	} else {
+	} else if (
+		loggedInUser &&
+		message.from !== loggedInUser.email &&
+		message.is_deleted !== true
+	) {
 		return (
-			<div
-				className='flex px-3 py-2'
-				title={chatItem.attachment.filename}>
+			<div className='flex px-3 py-2' title={message.attachment.filename}>
 				<div
 					className='max-w-[80%] min-w-[50%] bg-themChat1 text-themeText1 p-2 rounded-lg relative'
 					onMouseEnter={toggleMenuButtonApprearance}
@@ -86,8 +96,9 @@ function AttachmentItem({ chatItem }) {
 					{isDropDown && (
 						<div className='absolute top-0 bottom-0 left-0  z-10 px-3 '>
 							<DropDownMenu
-								chatItem={chatItem}
-								isDropDown={isDropDown}
+								message={message}
+								setMessage={setMessage}
+								toggleDropDownMenu={toggleDropDownMenu}
 							/>
 						</div>
 					)}
@@ -96,15 +107,15 @@ function AttachmentItem({ chatItem }) {
 							href='#'
 							onClick={downloadAttachment}
 							className='cursor-pointer truncate max-w-[80%] inline-block'
-							title={chatItem.attachment.filename} // Add title attribute for tooltip
+							title={message.attachment.filename} // Add title attribute for tooltip
 						>
-							{chatItem.attachment.filename}
+							{message.attachment.filename}
 						</a>
 					</div>
 				</div>
 			</div>
 		);
-	}
+	} else return <DeletedChatItem message={message} />;
 }
 
 export default AttachmentItem;

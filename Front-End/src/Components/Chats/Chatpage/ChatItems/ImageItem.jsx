@@ -5,31 +5,37 @@ import { dataURLtoBlob } from '../../../../HelperApi/FileConversions';
 import { updateStatusToSeen } from '../../../../HelperApi/WebSocketMessageHelper';
 import DropDownMenu from './DropDown/DropDownMenu';
 import DropDownToggler from './DropDown/DropDownToggler';
+import DeletedChatItem from '../DeletedChatItem';
 
 function ImageItem({ chatItem }) {
 	const [imageBlob, setImageBlob] = useState();
 	const { loggedInUser } = useAuth();
 	const [isMenuButtonVisible, setIsMenuButtonVisible] = useState(false);
 	const [isDropDown, setIsDropDown] = useState(false);
+	const [message, setMessage] = useState(chatItem);
 
 	useEffect(() => {
-		const blob = dataURLtoBlob(chatItem.image.image);
+		const blob = dataURLtoBlob(message.image.image);
 		setImageBlob(blob);
-		if (
-			chatItem.status !== 'seen' &&
-			chatItem.from !== loggedInUser.email
-		) {
-			updateStatusToSeen(chatItem);
+		if (message.status !== 'seen' && message.from !== loggedInUser.email) {
+			updateStatusToSeen(message);
 		}
-	}, [chatItem]);
+	}, [message]);
 
+	const toggleDropDownMenu = () => {
+		setIsDropDown((old) => !old);
+		toggleMenuButtonApprearance();
+	};
 	const toggleMenuButtonApprearance = () => {
 		setIsMenuButtonVisible((old) => !old);
 		setIsDropDown(false);
 	};
 
-	// if the message is created by the user, print on the right side of the screen
-	if (loggedInUser && chatItem.from === loggedInUser.email) {
+	if (
+		loggedInUser &&
+		message.from === loggedInUser.email &&
+		message.is_deleted !== true
+	) {
 		return (
 			<div className=' flex justify-end px-3 py-2'>
 				<div
@@ -42,8 +48,9 @@ function ImageItem({ chatItem }) {
 					{isDropDown && (
 						<div className='absolute top-0 bottom-0 right-0  z-10 px-3 '>
 							<DropDownMenu
-								chatItem={chatItem}
-								isDropDown={isDropDown}
+								message={message}
+								setMessage={setMessage}
+								toggleDropDownMenu={toggleDropDownMenu}
 							/>
 						</div>
 					)}
@@ -55,14 +62,18 @@ function ImageItem({ chatItem }) {
 							className=' mb-2'
 						/>
 					)}
-					<div>{chatItem.image.caption}</div>
-					<ChatItemBottomDetails chatItem={chatItem} />
+					<div>{message.image.caption}</div>
+					<ChatItemBottomDetails message={message} />
 				</div>
 			</div>
 		);
 	}
 	// if the message is received from other users, print on the left side of the screen
-	else {
+	else if (
+		loggedInUser &&
+		message.from !== loggedInUser.email &&
+		message.is_deleted !== true
+	) {
 		return (
 			<div className='px-3 py-2'>
 				<div
@@ -75,8 +86,9 @@ function ImageItem({ chatItem }) {
 					{isDropDown && (
 						<div className='absolute top-0 bottom-0 left-0  z-10 px-3 '>
 							<DropDownMenu
-								chatItem={chatItem}
-								isDropDown={isDropDown}
+								message={message}
+								setMessage={setMessage}
+								toggleDropDownMenu={toggleDropDownMenu}
 							/>
 						</div>
 					)}
@@ -88,14 +100,14 @@ function ImageItem({ chatItem }) {
 							className=' mb-2'
 						/>
 					)}
-					<div>{chatItem.image.caption}</div>
+					<div>{message.image.caption}</div>
 					<div className='text-xs flex justify-end items-end gap-2 text-themeText2'>
-						{chatItem.time}
+						{message.time}
 					</div>
 				</div>
 			</div>
 		);
-	}
+	} else return <DeletedChatItem message={message} />;
 }
 
 export default ImageItem;

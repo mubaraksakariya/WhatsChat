@@ -1,8 +1,39 @@
 import React, { useState } from 'react';
+import { retrySendingMessage } from '../../../../../HelperApi/WebSocketMessageHelper';
+import { deleteMessage } from '../../../../../HelperApi/MessageApi';
+import { useConfirmation } from '../../../../../Contexts/ConfirmationContext';
 
-function DropDownMenu({ chatItem, isDropDown }) {
+function DropDownMenu({ message, toggleDropDownMenu, setMessage }) {
+	const { confirm } = useConfirmation();
 	const manageAction = (action) => {
-		console.log(chatItem);
+		// console.log(message.status);
+		if (action == 'resend' && message.status == 'error') {
+			retrySendingMessage(message);
+		}
+		if (action == 'delete') {
+			confirm(
+				'Are you sure you want to delete?',
+				() => {
+					console.log('confiremd');
+					// Handle delete
+				},
+				() => {
+					console.log('rejectd');
+				}
+			);
+			// setMessage({
+			// 	...message,
+			// 	is_deleted: true,
+			// });
+			// deleteMessage(message.id);
+		}
+		if (action == 'forward') {
+			console.log(action);
+		}
+		if (action == 'report') {
+			console.log(action);
+		}
+		toggleDropDownMenu();
 	};
 
 	return (
@@ -48,13 +79,15 @@ function DropDownMenu({ chatItem, isDropDown }) {
 						</svg>
 					</span>
 				</li>
-				<li>
-					<span
-						onClick={() => manageAction('resend')}
-						className='block px-4 py-2 hover:text-themeGreen cursor-pointer'>
-						Resend
-					</span>
-				</li>
+				{message.status == 'error' && (
+					<li>
+						<span
+							onClick={() => manageAction('resend')}
+							className='block px-4 py-2 text-themeGreenButton1 hover:text-themeGreen cursor-pointer'>
+							Resend
+						</span>
+					</li>
+				)}
 				<li>
 					<span
 						onClick={() => manageAction('report')}

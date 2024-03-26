@@ -24,8 +24,7 @@ const openDatabase = () => {
 		};
 
 		request.onerror = (event) => {
-			// reject(event.target.error);
-			console.log('error occured');
+			reject(event.target.error);
 		};
 	});
 };
@@ -67,19 +66,32 @@ const deleteMessage = async (id) => {
 		const db = await openDatabase();
 		const transaction = db.transaction([MESSAGE_STORE_NAME], 'readwrite');
 		const store = transaction.objectStore(MESSAGE_STORE_NAME);
-		const request = store.delete(id);
+		const request = store.get(id);
 
-		return new Promise((resolve, reject) => {
-			request.onsuccess = () => {
-				resolve('Message deleted from IndexedDB');
-			};
+		request.onsuccess = () => {
+			const message = request.result;
+			message.is_deleted = true;
 
-			request.onerror = (event) => {
-				reject(event.target.error);
+			const updateRequest = store.put(message);
+			updateRequest.onsuccess = () => {
+				console.log('Message deleted');
 			};
-		});
+			updateRequest.onerror = (event) => {
+				console.error(
+					'Error updating message in IndexedDB:',
+					event.target.error
+				);
+			};
+		};
+
+		request.onerror = (event) => {
+			console.error(
+				'Error getting message from IndexedDB:',
+				event.target.error
+			);
+		};
 	} catch (error) {
-		console.error('Error deleting message:', error);
+		console.error('Error updating message in IndexedDB:', error);
 		throw error;
 	}
 };
