@@ -11,8 +11,8 @@ export const useConfirmation = () => {
 export const ConfirmationProvider = ({ children }) => {
 	const [confirmation, setConfirmation] = useState(null);
 
-	const confirm = (message, onConfirm, onReject) => {
-		setConfirmation({ message, onConfirm, onReject });
+	const confirm = (message, onConfirm, onReject, checkBoxList) => {
+		setConfirmation({ message, onConfirm, onReject, checkBoxList });
 	};
 
 	const clearConfirmation = () => {
@@ -25,14 +25,9 @@ export const ConfirmationProvider = ({ children }) => {
 			{confirmation && (
 				<Confirmation
 					message={confirmation.message}
-					onConfirm={() => {
-						confirmation.onConfirm();
-						clearConfirmation();
-					}}
-					onReject={() => {
-						confirmation.onReject();
-						clearConfirmation();
-					}}
+					onConfirm={confirmation.onConfirm}
+					onReject={confirmation.onReject}
+					checkBoxList={confirmation.checkBoxList}
 				/>
 			)}
 		</ConfirmationContext.Provider>

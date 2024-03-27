@@ -16,13 +16,22 @@ function TextItem({ chatItem }) {
 	const [message, setMessage] = useState(chatItem);
 
 	useEffect(() => {
-		if (message.status !== 'seen' && message.from !== loggedInUser.email) {
+		if (
+			message &&
+			message.status !== 'seen' &&
+			message.from !== loggedInUser.email
+		) {
 			updateStatusToSeen(message);
 		}
-		if (message.status === 'error' && message.from == loggedInUser.email) {
+		if (
+			message &&
+			message.status === 'error' &&
+			message.from == loggedInUser.email
+		) {
 			retrySendingMessage(message);
 		}
-	}, []);
+		setMessage(chatItem);
+	}, [chatItem]);
 	const toggleDropDownMenu = () => {
 		setIsDropDown((old) => !old);
 		toggleMenuButtonApprearance();
@@ -34,6 +43,7 @@ function TextItem({ chatItem }) {
 
 	if (
 		loggedInUser &&
+		message &&
 		message.from === loggedInUser.email &&
 		message.is_deleted !== true
 	) {
@@ -52,6 +62,7 @@ function TextItem({ chatItem }) {
 								message={message}
 								setMessage={setMessage}
 								toggleDropDownMenu={toggleDropDownMenu}
+								loggedInUser={loggedInUser}
 							/>
 						</div>
 					)}
@@ -62,6 +73,7 @@ function TextItem({ chatItem }) {
 		);
 	} else if (
 		loggedInUser &&
+		message &&
 		message.from !== loggedInUser.email &&
 		message.is_deleted !== true
 	) {
@@ -80,6 +92,7 @@ function TextItem({ chatItem }) {
 								message={message}
 								setMessage={setMessage}
 								toggleDropDownMenu={toggleDropDownMenu}
+								loggedInUser={loggedInUser}
 							/>
 						</div>
 					)}

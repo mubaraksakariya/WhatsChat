@@ -35,18 +35,19 @@ const addMessage = async (message) => {
 		const db = await openDatabase();
 		const transaction = db.transaction([MESSAGE_STORE_NAME], 'readwrite');
 		const store = transaction.objectStore(MESSAGE_STORE_NAME);
+
 		const request = store.add(message);
 
 		return new Promise((resolve, reject) => {
 			request.onsuccess = (event) => {
 				const newItemKey = event.target.result;
-				const getRequest = store.get(newItemKey);
-				getRequest.onsuccess = (event) => {
-					const newItem = event.target.result;
-					resolve(newItem);
+				const updatedMessage = { ...message, id: newItemKey }; // Add id to the message object
+				const updateRequest = store.put(updatedMessage); // Update the message object with the id
+				updateRequest.onsuccess = () => {
+					resolve(updatedMessage); // Resolve with the updated message
 				};
-				getRequest.onerror = (event) => {
-					reject('Error retrieving newly added item');
+				updateRequest.onerror = (event) => {
+					reject(event.target.error);
 				};
 			};
 
@@ -62,38 +63,45 @@ const addMessage = async (message) => {
 
 // Function to delete a message from the message store
 const deleteMessage = async (id) => {
-	try {
-		const db = await openDatabase();
-		const transaction = db.transaction([MESSAGE_STORE_NAME], 'readwrite');
-		const store = transaction.objectStore(MESSAGE_STORE_NAME);
-		const request = store.get(id);
+	return new Promise(async (resolve, reject) => {
+		try {
+			const db = await openDatabase();
+			const transaction = db.transaction(
+				[MESSAGE_STORE_NAME],
+				'readwrite'
+			);
+			const store = transaction.objectStore(MESSAGE_STORE_NAME);
+			const request = store.get(id);
 
-		request.onsuccess = () => {
-			const message = request.result;
-			message.is_deleted = true;
+			request.onsuccess = () => {
+				const message = request.result;
+				message.is_deleted = true;
 
-			const updateRequest = store.put(message);
-			updateRequest.onsuccess = () => {
-				console.log('Message deleted');
+				const updateRequest = store.put(message);
+				updateRequest.onsuccess = () => {
+					resolve(message); // Resolve with the deleted message
+				};
+				updateRequest.onerror = (event) => {
+					console.error(
+						'Error updating message in IndexedDB:',
+						event.target.error
+					);
+					reject(event.target.error);
+				};
 			};
-			updateRequest.onerror = (event) => {
+
+			request.onerror = (event) => {
 				console.error(
-					'Error updating message in IndexedDB:',
+					'Error getting message from IndexedDB:',
 					event.target.error
 				);
+				reject(event.target.error);
 			};
-		};
-
-		request.onerror = (event) => {
-			console.error(
-				'Error getting message from IndexedDB:',
-				event.target.error
-			);
-		};
-	} catch (error) {
-		console.error('Error updating message in IndexedDB:', error);
-		throw error;
-	}
+		} catch (error) {
+			console.error('Error updating message in IndexedDB:', error);
+			reject(error);
+		}
+	});
 };
 
 // Function to get all messages from the message store
@@ -163,38 +171,41 @@ const getPaginatedMessages = (page, pageSize, loggedInUser, user) => {
 };
 
 // Function to update the status of a message in the message store
-const updateStatus = async (messageId, status) => {
-	try {
-		const db = await openDatabase();
-		const transaction = db.transaction([MESSAGE_STORE_NAME], 'readwrite');
-		const store = transaction.objectStore(MESSAGE_STORE_NAME);
+const updateStatus = async (messageId, status, acknowledgement_id) => {
+	return new Promise((resolve, reject) => {
+		openDatabase()
+			.then((db) => {
+				const transaction = db.transaction(
+					[MESSAGE_STORE_NAME],
+					'readwrite'
+				);
+				const store = transaction.objectStore(MESSAGE_STORE_NAME);
 
-		const getRequest = store.get(messageId);
-		getRequest.onsuccess = (event) => {
-			const message = event.target.result;
-			if (message) {
-				message.status = status;
-				const updateRequest = store.put(message);
-				// updateRequest.onsuccess = () => {
-				// 	console.log('Message status updated successfully');
-				// };
-				updateRequest.onerror = (event) => {
-					console.error(
-						'Error updating message status:',
-						event.target.error
-					);
+				const getRequest = store.get(messageId);
+				getRequest.onsuccess = (event) => {
+					const message = event.target.result;
+					if (message) {
+						message.status = status;
+						message.acknowledgement_id = acknowledgement_id;
+						const updateRequest = store.put(message);
+						updateRequest.onsuccess = () => {
+							resolve(message); // Resolve with the updated message
+						};
+						updateRequest.onerror = (event) => {
+							reject(event.target.error);
+						};
+					} else {
+						reject(new Error('Message not found'));
+					}
 				};
-			} else {
-				console.error('Message not found');
-			}
-		};
-		getRequest.onerror = (event) => {
-			console.error('Error retrieving message:', event.target.error);
-		};
-	} catch (error) {
-		console.error('Error updating message status:', error);
-		throw error;
-	}
+				getRequest.onerror = (event) => {
+					reject(event.target.error);
+				};
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
 };
 
 // Formats last seen date to easily readable

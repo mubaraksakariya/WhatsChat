@@ -1,31 +1,52 @@
 import React, { useState } from 'react';
-import { retrySendingMessage } from '../../../../../HelperApi/WebSocketMessageHelper';
+import {
+	deleteMessageForEveryone,
+	retrySendingMessage,
+} from '../../../../../HelperApi/WebSocketMessageHelper';
 import { deleteMessage } from '../../../../../HelperApi/MessageApi';
 import { useConfirmation } from '../../../../../Contexts/ConfirmationContext';
 
-function DropDownMenu({ message, toggleDropDownMenu, setMessage }) {
-	const { confirm } = useConfirmation();
+function DropDownMenu({
+	message,
+	toggleDropDownMenu,
+	setMessage,
+	loggedInUser,
+}) {
+	const { confirm, clearConfirmation } = useConfirmation();
 	const manageAction = (action) => {
-		// console.log(message.status);
 		if (action == 'resend' && message.status == 'error') {
 			retrySendingMessage(message);
 		}
 		if (action == 'delete') {
-			confirm(
-				'Are you sure you want to delete?',
-				() => {
-					console.log('confiremd');
-					// Handle delete
-				},
-				() => {
-					console.log('rejectd');
+			let checkBoxList = [];
+			if (loggedInUser && message.from === loggedInUser.email) {
+				checkBoxList = ['delete for everyone ?'];
+			}
+			// on pressing ok on the confirmation dialogue
+			const onConfirm = async (selectedCheckBoxes) => {
+				try {
+					const deletedMessage = await deleteMessage(message.id);
+					// console.log('Message deleted:', deletedMessage);
+					setMessage(deletedMessage);
+					if (selectedCheckBoxes[0] == 0) {
+						deleteMessageForEveryone(message);
+					}
+				} catch (error) {
+					console.error('Error deleting message:', error);
 				}
+				clearConfirmation();
+			};
+			const onReject = () => {
+				console.log('rejectd');
+				clearConfirmation();
+			};
+
+			confirm(
+				'Are you sure you want to delete ?',
+				onConfirm,
+				onReject,
+				checkBoxList
 			);
-			// setMessage({
-			// 	...message,
-			// 	is_deleted: true,
-			// });
-			// deleteMessage(message.id);
 		}
 		if (action == 'forward') {
 			console.log(action);

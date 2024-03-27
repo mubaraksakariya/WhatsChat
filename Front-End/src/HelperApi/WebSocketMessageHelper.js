@@ -1,10 +1,10 @@
 import { setIsTyping } from '../Components/Chats/Chatpage/ChatPageUser';
 import { socket } from '../Contexts/WebsocketContext';
-import { addMessage, updateStatus } from './MessageApi';
+import { addMessage, deleteMessage, updateStatus } from './MessageApi';
 import { chatItem, setChatItem } from '../Pages/User/ChatPage';
 
 // distribute incoming message
-const manageIncomingMessage = (message) => {
+const manageIncomingMessage = async (message) => {
 	if (message.type === 'typing') {
 		setIsTyping(true);
 	}
@@ -14,13 +14,15 @@ const manageIncomingMessage = (message) => {
 		message.type === 'image' ||
 		message.type === 'audio'
 	) {
-		addMessage(message);
-		setChatItem((old) => [...old, message]);
+		const savedMessage = await addMessage(message);
+		// console.log(savedMessage);
+		setChatItem((old) => [...old, savedMessage]);
 		const acknowledgement = {
 			type: 'acknowledgement',
-			acknowledgement_id: message.acknowledgement_id,
+			id: savedMessage.id,
+			acknowledgement_id: savedMessage.acknowledgement_id,
 			status: 'received',
-			to: message.from,
+			to: savedMessage.from,
 		};
 		socket.forwardToWebSocket(acknowledgement);
 	}
@@ -30,14 +32,35 @@ const manageIncomingMessage = (message) => {
 	if (message.type === 'acknowledgement') {
 		updateMessageStatus(message);
 	}
+	if (message.type === 'delete') {
+		// console.log(message);
+		try {
+			const deletedMessage = await deleteMessage(message.id);
+			// console.log('Message deleted:', deletedMessage);
+			const updatedChatItem = chatItem.map((item, index) => {
+				if (item.id === message.id) {
+					return {
+						...item,
+						is_deleted: true,
+					};
+				}
+				return item;
+			});
+			// Assuming setChatItem is your state update function
+			setChatItem(updatedChatItem);
+		} catch (error) {
+			console.error('Error deleting message:', error);
+		}
+	}
 };
 
 // update the status to be read
 const updateMessageStatus = (message) => {
 	const messageId = message.acknowledgement_id;
 	const status = message.status;
+	const acknowledgement_id = message.id;
 	// in messageApi
-	updateStatus(messageId, status);
+	updateStatus(messageId, status, acknowledgement_id);
 	const messageIndex = chatItem.findIndex(
 		(message) => message.id === messageId
 	);
@@ -47,6 +70,8 @@ const updateMessageStatus = (message) => {
 
 		// Update the status of the message
 		updatedChatItem[messageIndex].status = status;
+		// update the id of the message the other user is saved on
+		updatedChatItem[messageIndex].acknowledgement_id = acknowledgement_id;
 
 		// Set the updated chatItem array as the new state
 		setChatItem(updatedChatItem);
@@ -54,23 +79,36 @@ const updateMessageStatus = (message) => {
 };
 
 // update the message to be seen
-const updateStatusToSeen = (message) => {
+const updateStatusToSeen = async (message) => {
+	// console.log('sending seen acknoledgment');
+	// console.log(message);
+	const updatedMessage = await updateStatus(message.id, 'seen');
+
 	const acknowledgement = {
 		type: 'acknowledgement',
 		acknowledgement_id: message.acknowledgement_id,
 		status: 'seen',
 		to: message.from,
+		id: updatedMessage.id,
 	};
 	socket.forwardToWebSocket(acknowledgement);
-	updateStatus(message.id, 'seen');
 };
 const retrySendingMessage = (message) => {
 	socket.forwardToWebSocket(message);
 };
 
+const deleteMessageForEveryone = (message) => {
+	const messageToDelete = {
+		...message,
+		type: 'delete',
+	};
+	// console.log(messageToDelete);
+	socket.forwardToWebSocket(messageToDelete);
+};
 export {
 	manageIncomingMessage,
 	updateMessageStatus,
 	updateStatusToSeen,
 	retrySendingMessage,
+	deleteMessageForEveryone,
 };

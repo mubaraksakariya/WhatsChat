@@ -17,10 +17,22 @@ function ImageItem({ chatItem }) {
 	useEffect(() => {
 		const blob = dataURLtoBlob(message.image.image);
 		setImageBlob(blob);
-		if (message.status !== 'seen' && message.from !== loggedInUser.email) {
+		if (
+			message &&
+			message.status !== 'seen' &&
+			message.from !== loggedInUser.email
+		) {
 			updateStatusToSeen(message);
 		}
-	}, [message]);
+		if (
+			message &&
+			message.status === 'error' &&
+			message.from == loggedInUser.email
+		) {
+			retrySendingMessage(message);
+		}
+		setMessage(chatItem);
+	}, [chatItem]);
 
 	const toggleDropDownMenu = () => {
 		setIsDropDown((old) => !old);
@@ -33,6 +45,7 @@ function ImageItem({ chatItem }) {
 
 	if (
 		loggedInUser &&
+		message &&
 		message.from === loggedInUser.email &&
 		message.is_deleted !== true
 	) {
@@ -51,6 +64,7 @@ function ImageItem({ chatItem }) {
 								message={message}
 								setMessage={setMessage}
 								toggleDropDownMenu={toggleDropDownMenu}
+								loggedInUser={loggedInUser}
 							/>
 						</div>
 					)}
@@ -71,6 +85,7 @@ function ImageItem({ chatItem }) {
 	// if the message is received from other users, print on the left side of the screen
 	else if (
 		loggedInUser &&
+		message &&
 		message.from !== loggedInUser.email &&
 		message.is_deleted !== true
 	) {
@@ -89,6 +104,7 @@ function ImageItem({ chatItem }) {
 								message={message}
 								setMessage={setMessage}
 								toggleDropDownMenu={toggleDropDownMenu}
+								loggedInUser={loggedInUser}
 							/>
 						</div>
 					)}

@@ -99,7 +99,7 @@ function ChatInput({ user, setChatItem }) {
 				};
 				reader.readAsDataURL(file);
 			});
-			setAttachment([]);
+			setAttachment(null);
 		}
 
 		if (text) {

@@ -5,6 +5,7 @@ function DeletedChatItem({ message }) {
 	const { loggedInUser } = useAuth();
 	if (
 		loggedInUser &&
+		message &&
 		message.from === loggedInUser.email &&
 		message.is_deleted == true
 	)
@@ -17,6 +18,7 @@ function DeletedChatItem({ message }) {
 		);
 	else if (
 		loggedInUser &&
+		message &&
 		message.from !== loggedInUser.email &&
 		message.is_deleted == true
 	)

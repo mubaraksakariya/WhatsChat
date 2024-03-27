@@ -14,10 +14,15 @@ function AttachmentItem({ chatItem }) {
 	const [message, setMessage] = useState(chatItem);
 
 	useEffect(() => {
-		if (message.status !== 'seen' && message.from !== loggedInUser.email) {
+		if (
+			message &&
+			message.status !== 'seen' &&
+			message.from !== loggedInUser.email
+		) {
 			updateStatusToSeen(message);
 		}
-	}, []);
+		setMessage(chatItem);
+	}, [chatItem]);
 	const downloadAttachment = (e) => {
 		e.preventDefault();
 		const blob = dataURLtoBlob(message.attachment.data);
@@ -41,6 +46,7 @@ function AttachmentItem({ chatItem }) {
 
 	if (
 		loggedInUser &&
+		message &&
 		message.from === loggedInUser.email &&
 		message.is_deleted !== true
 	) {
@@ -61,6 +67,7 @@ function AttachmentItem({ chatItem }) {
 								message={message}
 								setMessage={setMessage}
 								toggleDropDownMenu={toggleDropDownMenu}
+								loggedInUser={loggedInUser}
 							/>
 						</div>
 					)}
@@ -81,6 +88,7 @@ function AttachmentItem({ chatItem }) {
 		);
 	} else if (
 		loggedInUser &&
+		message &&
 		message.from !== loggedInUser.email &&
 		message.is_deleted !== true
 	) {
@@ -99,6 +107,7 @@ function AttachmentItem({ chatItem }) {
 								message={message}
 								setMessage={setMessage}
 								toggleDropDownMenu={toggleDropDownMenu}
+								loggedInUser={loggedInUser}
 							/>
 						</div>
 					)}

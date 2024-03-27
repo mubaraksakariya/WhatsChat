@@ -64,13 +64,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'from': sender.email,
                     'acknowledgement_id':message['id'],
                 }
-            if type == 'acknowledgement':
-                message_to_forward={
-                    'type':type,
-                    'from': sender.email,
-                    'acknowledgement_id':message['acknowledgement_id'],
-                    'status':message['status'],
-                }
             if type == 'attachment':
                 message_to_forward = {
                     'type':type,
@@ -94,7 +87,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'time':message['time'],
                     'from': sender.email,
                     'acknowledgement_id':message['id'],
-                }    
+                }
+            if type == 'delete':
+                # print(message)
+                message_to_forward={
+                    'type':type,
+                    'from': sender.email,
+                    'id':message['acknowledgement_id'],
+                }
+            if type == 'acknowledgement':
+                # print(message)
+                message_to_forward={
+                    'type':type,
+                    'from': sender.email,
+                    'acknowledgement_id':message['acknowledgement_id'],
+                    'status':message['status'],
+                    'id':message['id']
+                }
             # send the message
                 
             await self.channel_layer.send(

@@ -20,10 +20,15 @@ function AudioItem({ chatItem }) {
 		const blob = dataURLtoBlob(message.audio);
 		setAudioUrl(URL.createObjectURL(blob));
 		// to update the message status to 'seen'
-		if (message.status !== 'seen' && message.from !== loggedInUser.email) {
+		if (
+			message &&
+			message.status !== 'seen' &&
+			message.from !== loggedInUser.email
+		) {
 			updateStatusToSeen(message);
 		}
-	}, [message]);
+		setMessage(chatItem);
+	}, [chatItem]);
 
 	const toggleDropDownMenu = () => {
 		setIsDropDown((old) => !old);
@@ -36,6 +41,7 @@ function AudioItem({ chatItem }) {
 
 	if (
 		loggedInUser &&
+		message &&
 		message.from === loggedInUser.email &&
 		message.is_deleted !== true
 	) {
@@ -54,6 +60,7 @@ function AudioItem({ chatItem }) {
 								message={message}
 								setMessage={setMessage}
 								toggleDropDownMenu={toggleDropDownMenu}
+								loggedInUser={loggedInUser}
 							/>
 						</div>
 					)}
@@ -69,6 +76,7 @@ function AudioItem({ chatItem }) {
 		);
 	} else if (
 		loggedInUser &&
+		message &&
 		message.from !== loggedInUser.email &&
 		message.is_deleted !== true
 	) {
@@ -87,6 +95,7 @@ function AudioItem({ chatItem }) {
 								message={message}
 								setMessage={setMessage}
 								toggleDropDownMenu={toggleDropDownMenu}
+								loggedInUser={loggedInUser}
 							/>
 						</div>
 					)}
