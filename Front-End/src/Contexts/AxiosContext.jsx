@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react';
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-	baseURL: 'http://127.0.0.1:8000/api/',
+	baseURL: import.meta.env.VITE_API_URL,
 });
 
 // Add a request interceptor to add the token to all requests

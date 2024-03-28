@@ -17,7 +17,7 @@ export const WebSocketProvider = ({ children }) => {
 	socketState = socket;
 
 	const connectWebSocket = () => {
-		const ws = new WebSocket(`ws://localhost:8000/ws/chat/?token=${token}`);
+		const ws = new WebSocket(`${import.meta.env.VITE_WS_URL}${token}`);
 
 		ws.onopen = () => {
 			console.log('Connected to WebSocket');
