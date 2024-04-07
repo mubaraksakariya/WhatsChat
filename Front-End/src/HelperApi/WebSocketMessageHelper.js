@@ -2,6 +2,7 @@ import { setIsTyping } from '../Components/Chats/Chatpage/ChatPageUser';
 import { socket } from '../Contexts/WebsocketContext';
 import { addMessage, deleteMessage, updateStatus } from './MessageApi';
 import { chatItem, setChatItem } from '../Pages/User/ChatPage';
+import { receiveAnswer, startRinging } from '../Contexts/VideoCallContext';
 
 // distribute incoming message
 const manageIncomingMessage = async (message) => {
@@ -26,9 +27,27 @@ const manageIncomingMessage = async (message) => {
 		};
 		socket.forwardToWebSocket(acknowledgement);
 	}
-	// if (message.type === 'audio') {
-	// 	console.log(message);
-	// }
+	if (message.type === 'video-call') {
+		if (message.status === 'offer') {
+			// const offer = message.offer;
+			// to acknoledge the other user
+			const callReached = {
+				type: 'video-call',
+				status: 'reached',
+				to: message.from,
+				time: new Date().toLocaleString(),
+			};
+			socket.forwardToWebSocket(callReached);
+			startRinging(message);
+		}
+		if (message.status === 'reached') {
+			console.log('ringing');
+		}
+		if (message.status === 'answer') {
+			receiveAnswer(message);
+		}
+	}
+
 	if (message.type === 'acknowledgement') {
 		updateMessageStatus(message);
 	}

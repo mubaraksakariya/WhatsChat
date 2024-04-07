@@ -3,14 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../Contexts/AuthContext';
 import { Dropdown } from 'flowbite-react';
 import ChatPageUser from './ChatPageUser';
+import { useVideoCall } from '../../../Contexts/VideoCallContext';
 
 function ChatPageNav({ user }) {
 	const { logout } = useAuth();
 	const navigate = useNavigate();
+	const { startVideoCall } = useVideoCall();
 
-	const startVideoCall = () => {
-		console.log('Video call');
-	};
+	// const startVideoCall = () => {
+	// 	console.log('Video call');
+	// 	navigate('/video-call', { state: { user } });
+	// };
 	const startAudioCall = () => {
 		console.log('Audio call');
 	};
@@ -40,7 +43,9 @@ function ChatPageNav({ user }) {
 				</div>
 			</div>
 			<div className='flex items-center gap-5'>
-				<div className='cursor-pointer' onClick={startVideoCall}>
+				<div
+					className='cursor-pointer'
+					onClick={() => startVideoCall(user)}>
 					<svg
 						xmlns='http://www.w3.org/2000/svg'
 						viewBox='0 0 24 24'

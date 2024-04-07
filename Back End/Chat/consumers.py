@@ -88,6 +88,30 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'from': sender.email,
                     'acknowledgement_id':message['id'],
                 }
+            if type == 'video-call':
+                if message['status'] == 'offer':
+                    message_to_forward = {
+                        'type':type,
+                        'offer': message['offer'],
+                        'time':message['time'],
+                        'from': sender.email,
+                        'status':message['status']
+                    }
+                elif message['status'] == 'reached':
+                    message_to_forward = {
+                        'type':type,
+                        'time':message['time'],
+                        'from': sender.email,
+                        'status':message['status']
+                    }
+                elif message['status'] == 'answer':
+                    message_to_forward = {
+                        'type':type,
+                        'answer':message['answer'],
+                        'time':message['time'],
+                        'from': sender.email,
+                        'status':message['status']
+                    }    
             if type == 'delete':
                 # print(message)
                 message_to_forward={

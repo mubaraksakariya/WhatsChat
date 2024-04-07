@@ -12,7 +12,6 @@ export const WebSocketProvider = ({ children }) => {
 	const token = localStorage.getItem('token');
 	const [retryTimeout, setRetryTimeout] = useState(null);
 	const { isAuthenticated } = useAuth();
-
 	// to export freely
 	socketState = socket;
 
@@ -58,11 +57,13 @@ export const WebSocketProvider = ({ children }) => {
 						message.type === 'attachment' ||
 						message.type === 'image' ||
 						message.type === 'audio' ||
-						message.type === 'delete'
+						message.type === 'delete' ||
+						message.type === 'video-call'
 					) {
 						console.log(message.type + ' message send');
 						ws.send(JSON.stringify({ content: message }));
 					} else {
+						console.log(message);
 						console.log('message handling yet to code');
 					}
 				} catch (error) {

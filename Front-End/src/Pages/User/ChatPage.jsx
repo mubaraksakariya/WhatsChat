@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import ChatPageNav from '../../Components/Chats/Chatpage/ChatPageNav';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import ChatInput from '../../Components/Chats/Chatpage/ChatInput';
 import ChatScrollableDisplay from '../../Components/Chats/Chatpage/ScrollablePart/ChatScrollableDisplay';
-import Confirmation from '../../Contexts/Helpers/Confirmation';
 
 let setChatItemFunction;
 let chatItemState;
@@ -25,7 +24,6 @@ function ChatPage() {
 				setChatItem={setChatItem}
 				user={user}
 			/>
-
 			<div className='flex-none p-2'>
 				<ChatInput user={user} setChatItem={setChatItem} />
 			</div>

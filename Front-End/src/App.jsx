@@ -14,6 +14,7 @@ import NewChat from './Pages/User/NewChat';
 import NewContact from './Pages/User/NewContact';
 import ChatPage from './Pages/User/ChatPage';
 import { ConfirmationProvider } from './Contexts/ConfirmationContext';
+import { VideoCallProvider } from './Contexts/VideoCallContext';
 
 function App() {
 	const [isDark, setIsDark] = useState(false);
@@ -71,6 +72,7 @@ function App() {
 						<Navigate to='/signup' />
 					),
 				},
+
 				{
 					path: '/admin',
 					children: [
@@ -92,11 +94,13 @@ function App() {
 	} else
 		return (
 			<div className={isDark ? 'dark' : ''}>
-				<div className=' min-h-screen bg-black flex justify-center  items-center'>
-					<div className='w-screen max-w-lg  bg-themeBlue  min-h-screen flex justify-center  items-center'>
-						<ConfirmationProvider>
-							<RouterProvider router={router} />
-						</ConfirmationProvider>
+				<div className='bg-black flex justify-center  items-center'>
+					<div className='w-[100%] max-w-lg  min-h-[100dvh] bg-themeBlue relative'>
+						<VideoCallProvider>
+							<ConfirmationProvider>
+								<RouterProvider router={router} />
+							</ConfirmationProvider>
+						</VideoCallProvider>
 					</div>
 				</div>
 			</div>
