@@ -46,6 +46,9 @@ const manageIncomingMessage = async (message) => {
 		if (message.status === 'answer') {
 			receiveAnswer(message);
 		}
+		if (message.status === 'icecandidate') {
+			console.log(message);
+		}
 	}
 
 	if (message.type === 'acknowledgement') {

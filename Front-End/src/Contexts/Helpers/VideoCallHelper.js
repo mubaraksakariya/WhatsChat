@@ -37,16 +37,11 @@ async function makeVideoCall(user, loggedInUser, peerConnection) {
 }
 
 const answerCall = async (offer, user, loggedInUser, peerConnection) => {
-	console.log(`answer ${user}`);
-	// const configuration = {
-	// 	iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-	// };
-	// const peerConnection = new RTCPeerConnection(configuration);
 	if (offer && user && loggedInUser) {
 		peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
 		const answer = await peerConnection.createAnswer();
 		await peerConnection.setLocalDescription(answer);
-		const signal = {
+		const answerMessage = {
 			type: 'video-call',
 			from: loggedInUser.email,
 			to: user.email,
@@ -54,8 +49,7 @@ const answerCall = async (offer, user, loggedInUser, peerConnection) => {
 			answer: answer,
 			status: 'answer',
 		};
-		console.log(signal);
-		socket.forwardToWebSocket(signal);
+		socket.forwardToWebSocket(answerMessage);
 	}
 	return peerConnection;
 };

@@ -5,16 +5,25 @@ import { answerCall } from './Helpers/VideoCallHelper';
 import { useAxios } from './AxiosContext';
 import VideoCallRinger from './Helpers/VideoCallRinger';
 import VideoCallMain from './Helpers/VideoCallMain';
+import { useWebSocket } from './WebsocketContext';
 
 const VideoCallContext = createContext();
 let ringingTogler = null;
 let answerReceiver = null;
 
+const iceServers = [
+	{ urls: 'stun:stun.l.google.com:19302' },
+	{ urls: 'stun:stun1.l.google.com:19302' },
+	{ urls: 'stun:stun2.l.google.com:19302' },
+	{ urls: 'stun:stun3.l.google.com:19302' },
+	{ urls: 'stun:stun4.l.google.com:19302' },
+];
+
+const configuration = { iceServers };
+let peerConnection = new RTCPeerConnection(configuration);
+
 export const VideoCallProvider = ({ children }) => {
-	const configuration = {
-		iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-	};
-	let peerConnection = new RTCPeerConnection(configuration);
+	const socket = useWebSocket();
 
 	const [isVidoCall, setIsVidoCall] = useState(false);
 	const [isRinging, setIsRinging] = useState(false);
@@ -27,6 +36,22 @@ export const VideoCallProvider = ({ children }) => {
 
 	const { loggedInUser } = useAuth();
 	const axios = useAxios();
+
+	peerConnection.onicecandidate = (event) => {
+		if (event.candidate) {
+			const iceCandi = {
+				type: 'video-call',
+				from: loggedInUser.email,
+				to: user.email,
+				time: new Date().toLocaleString(),
+				candidate: event.candidate,
+				status: 'icecandidate',
+			};
+			socket.forwardToWebSocket(iceCandi);
+		}
+		console.log('peer connection event');
+		console.log(event);
+	};
 
 	const startVideoCall = (user) => {
 		setIsVidoCall(true);
@@ -44,7 +69,7 @@ export const VideoCallProvider = ({ children }) => {
 				setIsRinging(true);
 			});
 		} else {
-			console.log(message);
+			console.log('something went wrong in startRinging');
 		}
 	};
 
@@ -67,10 +92,9 @@ export const VideoCallProvider = ({ children }) => {
 		setIsCallStarted(false);
 	};
 
+	// function that receives 'answer' message for the'offer' message that have send initially
 	const receiveAnswer = (message) => {
-		console.log('call attended');
 		peerConnection.setRemoteDescription(message.answer);
-		console.log(peerConnection);
 	};
 
 	// for free export

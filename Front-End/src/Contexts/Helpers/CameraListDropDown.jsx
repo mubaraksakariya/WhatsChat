@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useVideoCall } from '../VideoCallContext';
 
-function CameraListDropDown({ setSelectedDevice, selectedDevice }) {
+function CameraListDropDown() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [allDevices, setAllDevices] = useState([]);
-
+	const { setSelectedDevice, selectedDevice } = useVideoCall();
 	const getConnectedDevices = async (type) => {
 		const devices = await navigator.mediaDevices.enumerateDevices();
 		return devices.filter((device) => device.kind === type);

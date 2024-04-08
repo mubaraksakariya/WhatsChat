@@ -50,10 +50,7 @@ function VideoCallMain({
 				</div>
 			</div>
 			<div className='absolute z-0 bottom-5 left-2'>
-				<CameraListDropDown
-					setSelectedDevice={setSelectedDevice}
-					selectedDevice={selectedDevice}
-				/>
+				<CameraListDropDown />
 			</div>
 		</div>
 	);

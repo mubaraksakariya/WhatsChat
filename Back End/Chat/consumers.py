@@ -111,7 +111,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         'time':message['time'],
                         'from': sender.email,
                         'status':message['status']
-                    }    
+                    }
+                elif message['status'] == 'icecandidate':
+                    message_to_forward = {
+                        'type':type,
+                        'candidate':message['candidate'],
+                        'time':message['time'],
+                        'from': sender.email,
+                        'status':message['status']
+                    } 
+
             if type == 'delete':
                 # print(message)
                 message_to_forward={
