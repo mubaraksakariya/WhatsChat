@@ -2,7 +2,11 @@ import { setIsTyping } from '../Components/Chats/Chatpage/ChatPageUser';
 import { socket } from '../Contexts/WebsocketContext';
 import { addMessage, deleteMessage, updateStatus } from './MessageApi';
 import { chatItem, setChatItem } from '../Pages/User/ChatPage';
-import { receiveAnswer, startRinging } from '../Contexts/VideoCallContext';
+import {
+	iceRecieve,
+	receiveAnswer,
+	startRinging,
+} from '../Contexts/VideoCallContext';
 
 // distribute incoming message
 const manageIncomingMessage = async (message) => {
@@ -47,7 +51,7 @@ const manageIncomingMessage = async (message) => {
 			receiveAnswer(message);
 		}
 		if (message.status === 'icecandidate') {
-			console.log(message);
+			iceRecieve(message);
 		}
 	}
 

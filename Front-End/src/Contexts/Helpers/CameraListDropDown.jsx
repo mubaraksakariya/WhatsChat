@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useVideoCall } from '../VideoCallContext';
+import { getConnectedDevices } from './VideoCallHelper';
 
 function CameraListDropDown() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [allDevices, setAllDevices] = useState([]);
 	const { setSelectedDevice, selectedDevice } = useVideoCall();
-	const getConnectedDevices = async (type) => {
-		const devices = await navigator.mediaDevices.enumerateDevices();
-		return devices.filter((device) => device.kind === type);
-	};
 
 	const toggleDropdown = () => {
 		setIsOpen(!isOpen);
@@ -21,10 +18,9 @@ function CameraListDropDown() {
 
 	useEffect(() => {
 		getConnectedDevices('videoinput').then((devices) => {
+			// console.log(devices);
 			setAllDevices(devices);
-			if (devices.length > 0) {
-				setSelectedDevice(devices[0]);
-			}
+			setSelectedDevice(devices[0]);
 		});
 	}, []);
 

@@ -1,15 +1,8 @@
-import React, { useEffect } from 'react';
-import CameraListDropDown from './CameraListDropDown';
-import { getMediaStream, makeVideoCall } from './VideoCallHelper';
+import React from 'react';
 import { useVideoCall } from '../VideoCallContext';
-// import VideoCallRinger from './VideoCallRinger';
 
-function VideoCaller({ user, loggedInUser }) {
-	const { rejectCall, peerConnection } = useVideoCall();
-
-	useEffect(() => {
-		makeVideoCall(user, loggedInUser, peerConnection);
-	}, []);
+function VideoCaller({ user }) {
+	const { rejectCall } = useVideoCall();
 
 	return (
 		<div className='absolute inset-0 max-w-lg bg-themeBlue'>

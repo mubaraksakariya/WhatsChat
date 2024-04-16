@@ -1,6 +1,8 @@
 import { socket } from '../WebsocketContext';
 
-const getMediaStream = async (selectedDevice) => {
+const getMediaStream = async () => {
+	const availableDevices = await getConnectedDevices('videoinput');
+	const selectedDevice = availableDevices[0];
 	const constraints = {
 		audio: { echoCancellation: true },
 		video: {
@@ -9,21 +11,55 @@ const getMediaStream = async (selectedDevice) => {
 			audio: true,
 		},
 	};
-	const openMediaDevices = async (constraints) => {
-		return await navigator.mediaDevices.getUserMedia(constraints);
-	};
 
 	try {
-		const stream = await openMediaDevices(constraints);
+		const stream = await navigator.mediaDevices.getUserMedia(constraints);
 		return stream;
 	} catch (error) {
-		console.log(`Error accessing media devices. ${error}`);
+		console.error(`Error accessing media devices: ${error}`);
+		throw error; // Rethrow the error to handle it at a higher level
 	}
 };
+// get all the media devices
+// const getConnectedDevices = async (type) => {
+// 	const devices = await navigator.mediaDevices.enumerateDevices();
+// 	return devices.filter((device) => device.kind === type);
+// };
+const getConnectedDevices = async (type) => {
+	const devices = await navigator.mediaDevices.enumerateDevices();
+	const videoDevices = devices.filter((device) => device.kind === type);
+	const availableDevices = [];
 
-async function makeVideoCall(user, loggedInUser, peerConnection) {
-	const offer = await peerConnection.createOffer();
-	await peerConnection.setLocalDescription(offer);
+	for (const device of videoDevices) {
+		let stream = null;
+		const constraints = {
+			audio: { echoCancellation: true },
+			video: {
+				deviceId: device?.deviceId,
+				video: true,
+				audio: true,
+			},
+		};
+		try {
+			stream = await navigator.mediaDevices.getUserMedia(constraints);
+		} catch (error) {
+			console.log(`${error}`);
+			// Ignore errors and continue to the next device
+		}
+
+		if (stream) {
+			stream.getTracks().forEach((track) => track.stop());
+			if (device.kind === type) {
+				availableDevices.push(device);
+			}
+		}
+	}
+
+	// console.log(availableDevices);
+	return availableDevices;
+};
+
+async function makeVideoCall(user, loggedInUser, offer) {
 	const signal = {
 		type: 'video-call',
 		from: loggedInUser.email,
@@ -32,25 +68,50 @@ async function makeVideoCall(user, loggedInUser, peerConnection) {
 		offer: offer,
 		status: 'offer',
 	};
-	socket.forwardToWebSocket(signal);
-	return peerConnection;
+	try {
+		socket.forwardToWebSocket(signal);
+	} catch (error) {
+		console.error(`Error creating offer: ${error}`);
+		throw error; // Rethrow the error to handle it at a higher level
+	}
 }
 
-const answerCall = async (offer, user, loggedInUser, peerConnection) => {
-	if (offer && user && loggedInUser) {
-		peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-		const answer = await peerConnection.createAnswer();
-		await peerConnection.setLocalDescription(answer);
-		const answerMessage = {
-			type: 'video-call',
-			from: loggedInUser.email,
-			to: user.email,
-			time: new Date().toLocaleString(),
-			answer: answer,
-			status: 'answer',
-		};
+const answerCall = async (answer, user, loggedInUser) => {
+	const answerMessage = {
+		type: 'video-call',
+		from: loggedInUser.email,
+		to: user.email,
+		time: new Date().toLocaleString(),
+		answer: answer,
+		status: 'answer',
+	};
+	try {
 		socket.forwardToWebSocket(answerMessage);
+	} catch (error) {
+		console.error(`Error answering call: ${error}`);
+		throw error; // Rethrow the error to handle it at a higher level
 	}
-	return peerConnection;
 };
-export { makeVideoCall, getMediaStream, answerCall };
+
+// send iceCandidate to other user
+const iceCallback = (user, loggedInUser, candidate) => {
+	const iceCandi = {
+		type: 'video-call',
+		from: loggedInUser.email,
+		to: user.email,
+		time: new Date().toLocaleString(),
+		candidate: candidate,
+		status: 'icecandidate',
+	};
+	socket.forwardToWebSocket(iceCandi);
+	// console.log('peer connection event, sending iceCandidate');
+	// console.log(event);
+};
+
+export {
+	makeVideoCall,
+	getMediaStream,
+	answerCall,
+	iceCallback,
+	getConnectedDevices,
+};

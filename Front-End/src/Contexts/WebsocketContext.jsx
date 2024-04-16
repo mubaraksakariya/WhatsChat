@@ -60,7 +60,7 @@ export const WebSocketProvider = ({ children }) => {
 						message.type === 'delete' ||
 						message.type === 'video-call'
 					) {
-						console.log(message.type + ' message send');
+						// console.log(message.type + ' message send');
 						ws.send(JSON.stringify({ content: message }));
 					} else {
 						console.log(message);
