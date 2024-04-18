@@ -2,29 +2,25 @@ import { socket } from '../WebsocketContext';
 
 const getMediaStream = async () => {
 	const availableDevices = await getConnectedDevices('videoinput');
-	const selectedDevice = availableDevices[0];
-	const constraints = {
-		audio: { echoCancellation: true },
-		video: {
-			deviceId: selectedDevice?.deviceId,
-			video: true,
-			audio: true,
-		},
-	};
-
 	try {
+		const selectedDevice = availableDevices[0];
+		const constraints = {
+			audio: { echoCancellation: true },
+			video: {
+				deviceId: selectedDevice?.deviceId,
+				video: true,
+				audio: true,
+			},
+		};
+
 		const stream = await navigator.mediaDevices.getUserMedia(constraints);
 		return stream;
 	} catch (error) {
-		console.error(`Error accessing media devices: ${error}`);
-		throw error; // Rethrow the error to handle it at a higher level
+		console.log(`Error accessing media devices: ${error}`);
+		// throw error; // Rethrow the error to handle it at a higher level
 	}
 };
-// get all the media devices
-// const getConnectedDevices = async (type) => {
-// 	const devices = await navigator.mediaDevices.enumerateDevices();
-// 	return devices.filter((device) => device.kind === type);
-// };
+
 const getConnectedDevices = async (type) => {
 	const devices = await navigator.mediaDevices.enumerateDevices();
 	const videoDevices = devices.filter((device) => device.kind === type);

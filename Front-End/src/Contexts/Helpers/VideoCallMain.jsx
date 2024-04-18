@@ -1,11 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import CameraListDropDown from './CameraListDropDown';
 import { useVideoCall } from '../VideoCallContext';
 
 function VideoCallMain() {
 	const { localMediaStream, remoteMediaStream } = useVideoCall();
+	const remoteVideoRef = useRef(null);
+	const localVideoRef = useRef(null);
+
 	useEffect(() => {
-		console.log(remoteMediaStream);
+		if (remoteMediaStream)
+			console.log(`remote media is ${remoteMediaStream}`);
+		else console.log('no remote media stream');
 	}, [remoteMediaStream]);
 
 	return (
@@ -42,9 +47,9 @@ function VideoCallMain() {
 					)}
 				</div>
 			</div>
-			<div className='absolute z-0 bottom-5 left-2'>
+			{/* <div className='absolute z-0 bottom-5 left-2'>
 				<CameraListDropDown />
-			</div>
+			</div> */}
 		</div>
 	);
 }

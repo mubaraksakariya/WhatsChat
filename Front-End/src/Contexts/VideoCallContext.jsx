@@ -34,10 +34,8 @@ export const VideoCallProvider = ({ children }) => {
 	const [isVidoCall, setIsVidoCall] = useState(false);
 	const [isRinging, setIsRinging] = useState(false);
 	const [isCallStarted, setIsCallStarted] = useState(false);
-	const [localMediaStream, setLocalMediaStream] = useState(new MediaStream());
-	const [remoteMediaStream, setRemoteMediaStream] = useState(
-		new MediaStream()
-	);
+	const [localMediaStream, setLocalMediaStream] = useState(null);
+	const [remoteMediaStream, setRemoteMediaStream] = useState(null);
 	const [selectedDevice, setSelectedDevice] = useState(null);
 	const [user, setUser] = useState(null);
 
@@ -53,12 +51,12 @@ export const VideoCallProvider = ({ children }) => {
 
 	// receive icCandidate
 	const iceRecieve = (message) => {
-		// console.log(message);
+		console.log('ice received and added');
 		peerConnection.addIceCandidate(message.candidate);
 	};
 
 	peerConnection.onicecandidateerror = (e) => {
-		console.log(e);
+		console.log(e.errorText);
 	};
 	// if connection established.. ?
 	peerConnection.onconnectionstatechange = (e) => {
@@ -117,6 +115,15 @@ export const VideoCallProvider = ({ children }) => {
 			await peerConnection.setRemoteDescription(
 				new RTCSessionDescription(message.offer)
 			);
+			// get stream
+			const stream = await getMediaStream();
+			setLocalMediaStream(stream);
+
+			// add stream to peerconnection
+			stream
+				.getTracks()
+				.forEach((track) => peerConnection.addTrack(track, stream));
+
 			axios.get(`user/${message.from}`).then((response) => {
 				const user = response.data.user;
 				setUser(user);
@@ -130,20 +137,19 @@ export const VideoCallProvider = ({ children }) => {
 	// on ringing side, option one, sends answer to caller
 	const acceptCall = async () => {
 		if (user && loggedInUser) {
-			const answer = await peerConnection.createAnswer();
-			setIsRinging(false);
-			setIsCallStarted(true);
-			// get stream
-			const stream = await getMediaStream();
-			setLocalMediaStream(stream);
-			// add stream to peerconnection
-			stream
-				.getTracks()
-				.forEach((track) => peerConnection.addTrack(track, stream));
-			await peerConnection.setLocalDescription(
-				new RTCSessionDescription(answer)
-			);
-			answerCall(answer, user, loggedInUser);
+			try {
+				const answer = await peerConnection.createAnswer();
+				answerCall(answer, user, loggedInUser);
+				await peerConnection.setLocalDescription(
+					new RTCSessionDescription(answer)
+				);
+
+				setIsRinging(false);
+				setIsCallStarted(true);
+			} catch (error) {
+				console.log('Error accepting call:', error);
+				// Add your error handling logic here
+			}
 		} else {
 			console.log(
 				`ERROR!!!! user is ${user} loggedInUser is ${loggedInUser}`
