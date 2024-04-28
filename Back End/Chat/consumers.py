@@ -119,7 +119,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         'time':message['time'],
                         'from': sender.email,
                         'status':message['status']
-                    } 
+                    }
+                elif message['status'] == 'end-call':
+                    message_to_forward = {
+                        'type':type,
+                        'time':message['time'],
+                        'from': sender.email,
+                        'status':message['status']
+                    }
+                
 
             if type == 'delete':
                 # print(message)

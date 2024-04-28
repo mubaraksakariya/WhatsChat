@@ -11,12 +11,14 @@ import {
 import { useAxios } from './AxiosContext';
 import VideoCallRinger from './Helpers/VideoCallRinger';
 import VideoCallMain from './Helpers/VideoCallMain';
+import { socket } from './WebsocketContext';
 // import { useWebSocket } from './WebsocketContext';
 
 const VideoCallContext = createContext();
 let ringingTogler = null;
 let answerReceiver = null;
 let iceReceiver = null;
+let onCallReject = null;
 
 const iceServers = [
 	{ urls: 'stun:stun.l.google.com:19302' },
@@ -64,6 +66,7 @@ export const VideoCallProvider = ({ children }) => {
 			console.log('peers connected');
 		}
 	};
+	// on fail to ice congig
 	peerConnection.oniceconnectionstatechange = () => {
 		if (peerConnection.iceConnectionState === 'failed') {
 			console.log('peer connection failed, trying to restart Ice');
@@ -157,14 +160,41 @@ export const VideoCallProvider = ({ children }) => {
 		}
 	};
 
-	// on ringing side,  option two
-	const rejectCall = () => {
+	// for both sides, to end calls  option two
+	const rejectCall = (e) => {
 		console.log('rejected');
+		endCall();
+		if (e) {
+			// call rejected side
+			// can be used for loging info
+
+			// inform the other side of rejection
+			const rejection = {
+				type: 'video-call',
+				from: loggedInUser.email,
+				to: user.email,
+				time: new Date().toLocaleString(),
+				status: 'end-call',
+			};
+			socket.forwardToWebSocket(rejection);
+		} else {
+			// the other side who got rejectd
+		}
+	};
+
+	// call ending procedures
+	const endCall = () => {
 		setIsRinging(false);
 		setIsVidoCall(false);
 		setIsCallStarted(false);
 		setRemoteMediaStream(null);
 		setLocalMediaStream(null);
+		// Close all tracks
+		peerConnection.getSenders().forEach((sender) => sender.track?.stop());
+		// Close the connection
+		peerConnection.close();
+		// Reset peerConnection
+		peerConnection = new RTCPeerConnection(configuration);
 	};
 
 	// function that receives 'answer' message for the'offer' message that have send initially
@@ -182,7 +212,7 @@ export const VideoCallProvider = ({ children }) => {
 	ringingTogler = startRinging;
 	answerReceiver = receiveAnswer;
 	iceReceiver = iceRecieve;
-
+	onCallReject = rejectCall;
 	return (
 		<VideoCallContext.Provider
 			value={{
@@ -220,4 +250,5 @@ export {
 	ringingTogler as startRinging,
 	answerReceiver as receiveAnswer,
 	iceReceiver as iceRecieve,
+	onCallReject as rejectCall,
 };

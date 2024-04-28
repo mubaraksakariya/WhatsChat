@@ -5,6 +5,7 @@ import { chatItem, setChatItem } from '../Pages/User/ChatPage';
 import {
 	iceRecieve,
 	receiveAnswer,
+	rejectCall,
 	startRinging,
 } from '../Contexts/VideoCallContext';
 
@@ -52,6 +53,9 @@ const manageIncomingMessage = async (message) => {
 		}
 		if (message.status === 'icecandidate') {
 			iceRecieve(message);
+		}
+		if (message.status === 'end-call') {
+			rejectCall();
 		}
 	}
 

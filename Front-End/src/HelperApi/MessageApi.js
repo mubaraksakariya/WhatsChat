@@ -1,9 +1,10 @@
 // IndexedDB Configuration
 const DB_NAME = 'WhatsChatDb';
-const DB_VERSION = 3;
+const DB_VERSION = 2;
 const MESSAGE_STORE_NAME = 'messages';
 
 // Function to open IndexedDB and return the database instance
+
 const openDatabase = () => {
 	return new Promise((resolve, reject) => {
 		const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -24,6 +25,7 @@ const openDatabase = () => {
 		};
 
 		request.onerror = (event) => {
+			console.log('indexDb error');
 			reject(event.target.error);
 		};
 	});
