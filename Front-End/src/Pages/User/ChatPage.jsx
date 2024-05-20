@@ -11,7 +11,11 @@ function ChatPage() {
 	const [chatItem, setChatItem] = useState([]);
 	const location = useLocation();
 	const user = location.state.user;
-	setChatItemFunction = setChatItem;
+	setChatItemFunction = async (message) => {
+		if (message.from === user.email)
+			setChatItem((old) => [...old, message]);
+		else console.log('message notification');
+	};
 	chatItemState = chatItem;
 	return (
 		<div className='relative flex flex-col min-h-[100dvh] max-h-[100dvh] min-w-[100%] overflow-hidden'>

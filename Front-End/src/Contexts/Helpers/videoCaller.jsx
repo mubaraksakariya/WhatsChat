@@ -1,14 +1,14 @@
 import React from 'react';
 import { useVideoCall } from '../VideoCallContext';
 
-function VideoCaller({ user }) {
+function VideoCaller({ user, callState }) {
 	const { rejectCall } = useVideoCall();
 
 	return (
 		<div className='absolute inset-0 max-w-lg bg-themeBlue'>
 			<div className=' min-h-full flex flex-col justify-center items-center'>
 				<div className='w-full flex-1 bg-green-700 flex flex-col justify-center items-center'>
-					<div>video calling </div>
+					<div>{callState}</div>
 					<div>{user.email}</div>
 				</div>
 				<div className=' w-full bg-red-700'>

@@ -22,37 +22,52 @@ const getMediaStream = async () => {
 };
 
 const getConnectedDevices = async (type) => {
-	const devices = await navigator.mediaDevices.enumerateDevices();
-	const videoDevices = devices.filter((device) => device.kind === type);
-	const availableDevices = [];
-
-	for (const device of videoDevices) {
-		let stream = null;
-		const constraints = {
-			audio: { echoCancellation: true },
-			video: {
-				deviceId: device?.deviceId,
-				video: true,
-				audio: true,
-			},
-		};
-		try {
-			stream = await navigator.mediaDevices.getUserMedia(constraints);
-		} catch (error) {
-			console.log(`${error}`);
-			// Ignore errors and continue to the next device
-		}
-
-		if (stream) {
-			stream.getTracks().forEach((track) => track.stop());
-			if (device.kind === type) {
-				availableDevices.push(device);
-			}
-		}
+	if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+		console.error(
+			'navigator.mediaDevices.enumerateDevices is not supported in this browser.'
+		);
+		return [];
 	}
 
-	// console.log(availableDevices);
-	return availableDevices;
+	try {
+		const devices = await navigator.mediaDevices.enumerateDevices();
+		const filteredDevices = devices.filter(
+			(device) => device.kind === type
+		);
+		const availableDevices = [];
+
+		for (const device of filteredDevices) {
+			let stream = null;
+			const constraints = {
+				video:
+					type === 'videoinput'
+						? { deviceId: device.deviceId }
+						: false,
+				audio:
+					type === 'audioinput'
+						? { deviceId: device.deviceId }
+						: false,
+			};
+
+			try {
+				stream = await navigator.mediaDevices.getUserMedia(constraints);
+				if (stream) {
+					stream.getTracks().forEach((track) => track.stop());
+					availableDevices.push(device);
+				}
+			} catch (error) {
+				console.log(
+					`Error accessing device ${device.label}: ${error.message}`
+				);
+				// Ignore errors and continue to the next device
+			}
+		}
+
+		return availableDevices;
+	} catch (error) {
+		console.error(`Error enumerating devices: ${error.message}`);
+		return [];
+	}
 };
 
 async function makeVideoCall(user, loggedInUser, offer) {

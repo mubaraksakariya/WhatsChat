@@ -1,35 +1,37 @@
+import { openDatabase } from './ContactApi';
+
 // IndexedDB Configuration
 const DB_NAME = 'WhatsChatDb';
-const DB_VERSION = 2;
+const DB_VERSION = 1;
 const MESSAGE_STORE_NAME = 'messages';
 
 // Function to open IndexedDB and return the database instance
 
-const openDatabase = () => {
-	return new Promise((resolve, reject) => {
-		const request = indexedDB.open(DB_NAME, DB_VERSION);
+// const openDatabase = () => {
+// 	return new Promise((resolve, reject) => {
+// 		const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-		request.onupgradeneeded = (event) => {
-			const db = event.target.result;
-			if (!db.objectStoreNames.contains(MESSAGE_STORE_NAME)) {
-				db.createObjectStore(MESSAGE_STORE_NAME, {
-					keyPath: 'id',
-					autoIncrement: true,
-				});
-			}
-		};
+// 		request.onupgradeneeded = (event) => {
+// 			const db = event.target.result;
+// 			if (!db.objectStoreNames.contains(MESSAGE_STORE_NAME)) {
+// 				db.createObjectStore(MESSAGE_STORE_NAME, {
+// 					keyPath: 'id',
+// 					autoIncrement: true,
+// 				});
+// 			}
+// 		};
 
-		request.onsuccess = (event) => {
-			const db = event.target.result;
-			resolve(db);
-		};
+// 		request.onsuccess = (event) => {
+// 			const db = event.target.result;
+// 			resolve(db);
+// 		};
 
-		request.onerror = (event) => {
-			console.log('indexDb error');
-			reject(event.target.error);
-		};
-	});
-};
+// 		request.onerror = (event) => {
+// 			console.log('indexDb error');
+// 			reject(event.target.error);
+// 		};
+// 	});
+// };
 
 // Function to add a message to the message store
 const addMessage = async (message) => {

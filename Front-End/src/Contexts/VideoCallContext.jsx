@@ -19,6 +19,7 @@ let ringingTogler = null;
 let answerReceiver = null;
 let iceReceiver = null;
 let onCallReject = null;
+let callStateSetter = null;
 
 const iceServers = [
 	{ urls: 'stun:stun.l.google.com:19302' },
@@ -35,6 +36,8 @@ let peerConnection = new RTCPeerConnection(configuration);
 export const VideoCallProvider = ({ children }) => {
 	const [isVidoCall, setIsVidoCall] = useState(false);
 	const [isRinging, setIsRinging] = useState(false);
+	const [callState, setCallState] = useState('');
+	const [ringTimer, setRingTimer] = useState(0);
 	const [isCallStarted, setIsCallStarted] = useState(false);
 	const [localMediaStream, setLocalMediaStream] = useState(null);
 	const [remoteMediaStream, setRemoteMediaStream] = useState(null);
@@ -87,7 +90,20 @@ export const VideoCallProvider = ({ children }) => {
 		}
 	};
 
-	// Runs when the video icon is pressed, sends offer,
+	// manages the call state, $calling , $ringing,
+	const changeCallState = (stateString) => {
+		setCallState(stateString);
+	};
+
+	const startTimer = (callback) => {
+		return setTimeout(callback, 30000); // 30 seconds
+	};
+
+	const stopTimer = (timerId) => {
+		clearTimeout(ringTimer);
+	};
+
+	// Runs when the video icon is pressed, sends offer, the caller side
 	const startVideoCall = async (user) => {
 		try {
 			setUser(user);
@@ -100,15 +116,28 @@ export const VideoCallProvider = ({ children }) => {
 			await peerConnection.setLocalDescription(offer);
 			makeVideoCall(user, loggedInUser, peerConnection.localDescription);
 			setIsVidoCall(true);
+			changeCallState('calling');
+			const timerId = startTimer(() => {
+				console.log('Timer finished');
+				rejectCall();
+			});
+			setRingTimer(timerId);
 		} catch (error) {
 			console.error('Error starting video call:', error);
 			// Add your error handling logic here
 		}
 	};
 
-	// to close video calling window
-	const stopVideoCall = () => {
+	// function that receives 'answer' message for the'offer' message that have send initially
+	// at the sender side
+	const receiveAnswer = async (message) => {
+		const answer = message.answer;
+		await peerConnection.setRemoteDescription(
+			new RTCSessionDescription(answer)
+		);
 		setIsVidoCall(false);
+		setIsCallStarted(true);
+		stopTimer();
 	};
 
 	// incoming call, ringing side,  receives an 'offer' from caller, starts ringing
@@ -131,6 +160,11 @@ export const VideoCallProvider = ({ children }) => {
 				const user = response.data.user;
 				setUser(user);
 				setIsRinging(true);
+				const timerId = startTimer(() => {
+					console.log('Timer finished');
+					rejectCall();
+				});
+				setRingTimer(timerId);
 			});
 		} else {
 			console.log('something went wrong in startRinging');
@@ -149,6 +183,7 @@ export const VideoCallProvider = ({ children }) => {
 
 				setIsRinging(false);
 				setIsCallStarted(true);
+				stopTimer();
 			} catch (error) {
 				console.log('Error accepting call:', error);
 				// Add your error handling logic here
@@ -189,6 +224,8 @@ export const VideoCallProvider = ({ children }) => {
 		setIsCallStarted(false);
 		setRemoteMediaStream(null);
 		setLocalMediaStream(null);
+		changeCallState('');
+		stopTimer();
 		// Close all tracks
 		peerConnection.getSenders().forEach((sender) => sender.track?.stop());
 		// Close the connection
@@ -197,22 +234,13 @@ export const VideoCallProvider = ({ children }) => {
 		peerConnection = new RTCPeerConnection(configuration);
 	};
 
-	// function that receives 'answer' message for the'offer' message that have send initially
-	// at the sender side
-	const receiveAnswer = async (message) => {
-		const answer = message.answer;
-		await peerConnection.setRemoteDescription(
-			new RTCSessionDescription(answer)
-		);
-		setIsVidoCall(false);
-		setIsCallStarted(true);
-	};
-
 	// for free export
 	ringingTogler = startRinging;
 	answerReceiver = receiveAnswer;
 	iceReceiver = iceRecieve;
 	onCallReject = rejectCall;
+	callStateSetter = changeCallState;
+
 	return (
 		<VideoCallContext.Provider
 			value={{
@@ -224,17 +252,19 @@ export const VideoCallProvider = ({ children }) => {
 				setSelectedDevice,
 				peerConnection,
 				startVideoCall,
-				stopVideoCall,
 				isRinging,
 				startRinging,
 				acceptCall,
 				rejectCall,
 				iceRecieve,
+				setCallState,
 			}}>
 			{children}
 
 			{/* for making a call , caller side */}
-			{user !== null && isVidoCall && <VideoCaller user={user} />}
+			{user !== null && isVidoCall && (
+				<VideoCaller user={user} callState={callState} />
+			)}
 
 			{/* for ringer side, indiactor and controls */}
 			{user !== null && isRinging && <VideoCallRinger user={user} />}
@@ -251,4 +281,5 @@ export {
 	answerReceiver as receiveAnswer,
 	iceReceiver as iceRecieve,
 	onCallReject as rejectCall,
+	callStateSetter as changeCallState,
 };

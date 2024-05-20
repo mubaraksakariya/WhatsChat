@@ -2,6 +2,7 @@
 const DB_NAME = 'WhatsChatDb';
 const DB_VERSION = 1;
 const CONTACT_STORE_NAME = 'contacts';
+const MESSAGE_STORE_NAME = 'messages';
 
 // Function to open IndexedDB and return the database instance
 
@@ -13,6 +14,12 @@ const openDatabase = () => {
 			const db = event.target.result;
 			if (!db.objectStoreNames.contains(CONTACT_STORE_NAME)) {
 				db.createObjectStore(CONTACT_STORE_NAME, {
+					keyPath: 'id',
+					autoIncrement: true,
+				});
+			}
+			if (!db.objectStoreNames.contains(MESSAGE_STORE_NAME)) {
+				db.createObjectStore(MESSAGE_STORE_NAME, {
 					keyPath: 'id',
 					autoIncrement: true,
 				});
@@ -111,4 +118,10 @@ const isEmailUnique = async (email) => {
 };
 
 // Export the functions for external use
-export { addContact, deleteContact, getAllContacts, isEmailUnique };
+export {
+	addContact,
+	deleteContact,
+	getAllContacts,
+	isEmailUnique,
+	openDatabase,
+};

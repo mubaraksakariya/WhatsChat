@@ -19,7 +19,7 @@ class CustomUser(AbstractBaseUser):
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'last_seen']
+        fields = ['id', 'email', 'first_name', 'last_name', 'is_active', 'last_seen']
 
 class ConnectedUser(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)

@@ -12,16 +12,23 @@ function ChatPageUser({ user }) {
 	const [isOnline, setIsonline] = useState(false);
 	const axios = useAxios();
 
-	setIsTypingFunction = setIsTyping;
-	isTypingState = isTyping;
-
-	useEffect(() => {
-		if (isTyping) {
+	setIsTypingFunction = (message) => {
+		console.log(message);
+		if (message.from === profile.email) {
+			setIsTyping(true);
 			setTimeout(() => {
 				setIsTyping(false);
 			}, 3000);
-		}
-	}, [isTyping]);
+		} else console.log(message);
+	};
+	isTypingState = isTyping;
+	// useEffect(() => {
+	// 	if (isTyping) {
+	// 		setTimeout(() => {
+	// 			setIsTyping(false);
+	// 		}, 3000);
+	// 	}
+	// }, [isTyping]);
 
 	useEffect(() => {
 		const fetchProfile = async () => {

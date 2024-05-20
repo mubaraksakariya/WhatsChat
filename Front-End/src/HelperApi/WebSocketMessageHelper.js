@@ -3,6 +3,7 @@ import { socket } from '../Contexts/WebsocketContext';
 import { addMessage, deleteMessage, updateStatus } from './MessageApi';
 import { chatItem, setChatItem } from '../Pages/User/ChatPage';
 import {
+	changeCallState,
 	iceRecieve,
 	receiveAnswer,
 	rejectCall,
@@ -12,7 +13,7 @@ import {
 // distribute incoming message
 const manageIncomingMessage = async (message) => {
 	if (message.type === 'typing') {
-		setIsTyping(true);
+		setIsTyping(message);
 	}
 	if (
 		message.type === 'text' ||
@@ -22,7 +23,7 @@ const manageIncomingMessage = async (message) => {
 	) {
 		const savedMessage = await addMessage(message);
 		// console.log(savedMessage);
-		setChatItem((old) => [...old, savedMessage]);
+		await setChatItem(savedMessage);
 		const acknowledgement = {
 			type: 'acknowledgement',
 			id: savedMessage.id,
@@ -33,9 +34,10 @@ const manageIncomingMessage = async (message) => {
 		socket.forwardToWebSocket(acknowledgement);
 	}
 	if (message.type === 'video-call') {
+		// incoming call, receives an offer
 		if (message.status === 'offer') {
-			// const offer = message.offer;
-			// to acknoledge the other user
+			console.log(message);
+			await startRinging(message);
 			const callReached = {
 				type: 'video-call',
 				status: 'reached',
@@ -43,10 +45,12 @@ const manageIncomingMessage = async (message) => {
 				time: new Date().toLocaleString(),
 			};
 			socket.forwardToWebSocket(callReached);
-			startRinging(message);
 		}
+
+		// aknowledgment message that other device is being rung
 		if (message.status === 'reached') {
 			console.log('ringing');
+			changeCallState('ringing');
 		}
 		if (message.status === 'answer') {
 			receiveAnswer(message);
@@ -135,6 +139,7 @@ const deleteMessageForEveryone = (message) => {
 	// console.log(messageToDelete);
 	socket.forwardToWebSocket(messageToDelete);
 };
+
 export {
 	manageIncomingMessage,
 	updateMessageStatus,
