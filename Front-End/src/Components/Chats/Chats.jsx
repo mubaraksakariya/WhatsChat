@@ -4,7 +4,7 @@ import Chat from './Chat';
 import NewChatButton from './NewChatButton';
 import { useNavigate } from 'react-router-dom';
 import { getAllContacts } from '../../HelperApi/ContactApi';
-
+let refreshChat = null;
 function Chats() {
 	const [contacts, setContacts] = useState(null);
 	const navigate = useNavigate();
@@ -12,10 +12,13 @@ function Chats() {
 	const setSelectedChat = (user) => {
 		navigate('/chat/', { state: { user } });
 	};
-	useEffect(() => {
+	refreshChat = async () => {
 		getAllContacts().then((response) => {
 			setContacts(response);
 		});
+	};
+	useEffect(() => {
+		refreshChat();
 	}, []);
 
 	return (
@@ -34,5 +37,7 @@ function Chats() {
 		</div>
 	);
 }
-
+export const refreshChatFromChats = () => {
+	refreshChat();
+};
 export default Chats;

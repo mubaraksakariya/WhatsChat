@@ -13,22 +13,14 @@ function ChatPageUser({ user }) {
 	const axios = useAxios();
 
 	setIsTypingFunction = (message) => {
-		console.log(message);
 		if (message.from === profile.email) {
 			setIsTyping(true);
 			setTimeout(() => {
 				setIsTyping(false);
 			}, 3000);
-		} else console.log(message);
+		}
 	};
 	isTypingState = isTyping;
-	// useEffect(() => {
-	// 	if (isTyping) {
-	// 		setTimeout(() => {
-	// 			setIsTyping(false);
-	// 		}, 3000);
-	// 	}
-	// }, [isTyping]);
 
 	useEffect(() => {
 		const fetchProfile = async () => {

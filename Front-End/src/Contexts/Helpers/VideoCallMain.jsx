@@ -1,15 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import CameraListDropDown from './CameraListDropDown';
 import { useVideoCall } from '../VideoCallContext';
 
 function VideoCallMain() {
 	const { localMediaStream, remoteMediaStream, rejectCall } = useVideoCall();
-
-	useEffect(() => {
-		if (remoteMediaStream)
-			console.log(`remote media is ${remoteMediaStream}`);
-		else console.log('no remote media stream');
-	}, [remoteMediaStream]);
 
 	return (
 		<div className='absolute inset-0 max-w-lg bg-themeBlue'>

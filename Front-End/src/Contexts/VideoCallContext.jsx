@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useRef, useState } from 'react';
 import { useAuth } from './AuthContext';
 import VideoCaller from './Helpers/videoCaller';
 import {
@@ -12,6 +12,7 @@ import { useAxios } from './AxiosContext';
 import VideoCallRinger from './Helpers/VideoCallRinger';
 import VideoCallMain from './Helpers/VideoCallMain';
 import { socket } from './WebsocketContext';
+import { addCallLog } from '../HelperApi/CallLogApi';
 // import { useWebSocket } from './WebsocketContext';
 
 const VideoCallContext = createContext();
@@ -43,10 +44,15 @@ export const VideoCallProvider = ({ children }) => {
 	const [remoteMediaStream, setRemoteMediaStream] = useState(null);
 	const [selectedDevice, setSelectedDevice] = useState(null);
 	const [user, setUser] = useState(null);
-
+	// const [callLog, setCallLog] = useState({});
+	const callLogRef = useRef();
+	const callWaitingTime = 5000;
 	const { loggedInUser } = useAuth();
 	const axios = useAxios();
 
+	const setCallLog = (log) => {
+		callLogRef.current = log;
+	};
 	// send iceCendidates to other user
 	peerConnection.onicecandidate = (e) => {
 		if (e.candidate) {
@@ -95,8 +101,9 @@ export const VideoCallProvider = ({ children }) => {
 		setCallState(stateString);
 	};
 
+	// timer for calling and ringing
 	const startTimer = (callback) => {
-		return setTimeout(callback, 30000); // 30 seconds
+		return setTimeout(callback, callWaitingTime); // 30 seconds
 	};
 
 	const stopTimer = (timerId) => {
@@ -116,9 +123,25 @@ export const VideoCallProvider = ({ children }) => {
 			await peerConnection.setLocalDescription(offer);
 			makeVideoCall(user, loggedInUser, peerConnection.localDescription);
 			setIsVidoCall(true);
+
+			// set call log
+			const log = {
+				from: loggedInUser,
+				to: user,
+				callingTime: new Date().toISOString(),
+				type: 'outgoing',
+				status: 'calling',
+			};
+			setCallLog(log);
+
 			changeCallState('calling');
+
 			const timerId = startTimer(() => {
-				console.log('Timer finished');
+				const log = {
+					...callLogRef.current,
+					status: 'unattended',
+				};
+				setCallLog(log);
 				rejectCall();
 			});
 			setRingTimer(timerId);
@@ -138,6 +161,11 @@ export const VideoCallProvider = ({ children }) => {
 		setIsVidoCall(false);
 		setIsCallStarted(true);
 		stopTimer();
+		setCallLog({
+			...callLogRef.current,
+			status: 'answered',
+			answeringTime: new Date().toISOString(),
+		});
 	};
 
 	// incoming call, ringing side,  receives an 'offer' from caller, starts ringing
@@ -160,8 +188,21 @@ export const VideoCallProvider = ({ children }) => {
 				const user = response.data.user;
 				setUser(user);
 				setIsRinging(true);
+				// set call log
+				const log = {
+					from: user,
+					to: loggedInUser,
+					startTime: new Date().toISOString(),
+					type: 'incoming',
+					status: 'ringing',
+				};
+				setCallLog(log);
 				const timerId = startTimer(() => {
 					console.log('Timer finished');
+					setCallLog({
+						...callLogRef.current,
+						status: 'missed',
+					});
 					rejectCall();
 				});
 				setRingTimer(timerId);
@@ -184,6 +225,12 @@ export const VideoCallProvider = ({ children }) => {
 				setIsRinging(false);
 				setIsCallStarted(true);
 				stopTimer();
+				// set call log
+				setCallLog({
+					...callLogRef.current,
+					status: 'accepted',
+					acceptingTime: new Date().toISOString(),
+				});
 			} catch (error) {
 				console.log('Error accepting call:', error);
 				// Add your error handling logic here
@@ -197,13 +244,10 @@ export const VideoCallProvider = ({ children }) => {
 
 	// for both sides, to end calls  option two
 	const rejectCall = (e) => {
-		console.log('rejected');
-		endCall();
+		// call rejected by purely clicking the button
 		if (e) {
-			// call rejected side
-			// can be used for loging info
-
 			// inform the other side of rejection
+			console.log('rejected');
 			const rejection = {
 				type: 'video-call',
 				from: loggedInUser.email,
@@ -212,9 +256,100 @@ export const VideoCallProvider = ({ children }) => {
 				status: 'end-call',
 			};
 			socket.forwardToWebSocket(rejection);
+			// set the call log
+			if (callLogRef.current.type === 'outgoing') {
+				if (callLogRef.current.status === 'calling') {
+					console.log('cut the call before attending');
+					setCallLog({
+						...callLogRef.current,
+						explanation: 'cut the call before attending',
+					});
+				}
+				if (callLogRef.current.status === 'answered') {
+					console.log('cut the call after talking');
+					setCallLog({
+						...callLogRef.current,
+						callEndingTime: new Date().toISOString(),
+						explanation: 'cut the call after talking',
+					});
+				}
+			}
+			if (callLogRef.current.type === 'incoming') {
+				if (callLogRef.current.status === 'ringing') {
+					console.log('cut the call on ringing');
+					setCallLog({
+						...callLogRef.current,
+						explanation: 'cut the call on ringing',
+					});
+				}
+				if (callLogRef.current.status === 'accepted') {
+					console.log('cut the call after receiving');
+					setCallLog({
+						...callLogRef.current,
+						callEndingTime: new Date().toISOString(),
+						explanation: 'cut the call after receiving',
+					});
+				}
+			}
 		} else {
-			// the other side who got rejectd
+			if (callLogRef.current.type === 'outgoing') {
+				if (callLogRef.current.status === 'unattended') {
+					console.log(
+						`call ended before attending, after ${callWaitingTime} seconds`
+					);
+					setCallLog({
+						...callLogRef.current,
+						explanation: `call ended before attending, after ${callWaitingTime} seconds`,
+					});
+				}
+				if (callLogRef.current.status === 'calling') {
+					console.log(
+						'the call cut from the other side without attending'
+					);
+					setCallLog({
+						...callLogRef.current,
+						explanation:
+							'the call cut from the other side without attending',
+					});
+				}
+				if (callLogRef.current.status === 'answered') {
+					console.log(
+						'the call ended from the other side after talking'
+					);
+					setCallLog({
+						...callLogRef.current,
+						callEndingTime: new Date().toISOString(),
+						explanation:
+							'the call ended from the other side after talking',
+					});
+				}
+			}
+			if (callLogRef.current.type === 'incoming') {
+				if (callLogRef.current.status === 'missed') {
+					console.log(
+						`the call rang for ${callEndingTime} seconds , without answering`
+					);
+					setCallLog({
+						...callLogRef.current,
+						explanation: `the call rang for ${callEndingTime} seconds , without answering`,
+					});
+				} else {
+					console.log(
+						'the call ended from the other side after talking'
+					);
+					setCallLog({
+						...callLogRef.current,
+						callEndingTime: new Date().toISOString(),
+						explanation:
+							'the call ended from the other side after talking',
+					});
+				}
+			}
 		}
+		addCallLog(callLogRef.current);
+		console.log(callLogRef.current);
+		callLogRef.current = {};
+		endCall();
 	};
 
 	// call ending procedures

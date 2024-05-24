@@ -11,6 +11,7 @@ function ChatPage() {
 	const [chatItem, setChatItem] = useState([]);
 	const location = useLocation();
 	const user = location.state.user;
+	// saves message to chat, if user doese not exist creates one
 	setChatItemFunction = async (message) => {
 		if (message.from === user.email)
 			setChatItem((old) => [...old, message]);

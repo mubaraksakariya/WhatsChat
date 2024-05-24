@@ -9,11 +9,15 @@ import {
 	rejectCall,
 	startRinging,
 } from '../Contexts/VideoCallContext';
+import { addContact } from './ContactApi';
+import { refreshChatFromChats } from '../Components/Chats/Chats';
 
 // distribute incoming message
 const manageIncomingMessage = async (message) => {
 	if (message.type === 'typing') {
-		setIsTyping(message);
+		try {
+			setIsTyping(message);
+		} catch (error) {}
 	}
 	if (
 		message.type === 'text' ||
@@ -22,8 +26,21 @@ const manageIncomingMessage = async (message) => {
 		message.type === 'audio'
 	) {
 		const savedMessage = await addMessage(message);
-		// console.log(savedMessage);
-		await setChatItem(savedMessage);
+		try {
+			await setChatItem(savedMessage);
+		} catch (error) {
+			//if the messager is not saved on the receiver side
+			// create a contact
+			const contact = {
+				first_name: savedMessage.from,
+				last_name: savedMessage.from,
+				email: savedMessage.from,
+			};
+			await addContact(contact);
+			refreshChatFromChats();
+			// await setChatItem(savedMessage);
+		}
+		// send unknoledgement back the sender
 		const acknowledgement = {
 			type: 'acknowledgement',
 			id: savedMessage.id,
@@ -36,7 +53,6 @@ const manageIncomingMessage = async (message) => {
 	if (message.type === 'video-call') {
 		// incoming call, receives an offer
 		if (message.status === 'offer') {
-			console.log(message);
 			await startRinging(message);
 			const callReached = {
 				type: 'video-call',

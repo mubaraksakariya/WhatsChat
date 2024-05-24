@@ -1,8 +1,8 @@
 import { openDatabase } from './ContactApi';
 
 // IndexedDB Configuration
-const DB_NAME = 'WhatsChatDb';
-const DB_VERSION = 1;
+// const DB_NAME = 'WhatsChatDb';
+// const DB_VERSION = 1;
 const MESSAGE_STORE_NAME = 'messages';
 
 // Function to open IndexedDB and return the database instance

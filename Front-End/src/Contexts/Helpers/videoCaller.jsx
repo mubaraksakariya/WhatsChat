@@ -1,8 +1,12 @@
 import React from 'react';
 import { useVideoCall } from '../VideoCallContext';
+import { useAuth } from '../AuthContext';
+
+// the user who is initiating the call, can end the call
 
 function VideoCaller({ user, callState }) {
 	const { rejectCall } = useVideoCall();
+	const { loggedInUser } = useAuth();
 
 	return (
 		<div className='absolute inset-0 max-w-lg bg-themeBlue'>
@@ -15,7 +19,10 @@ function VideoCaller({ user, callState }) {
 					<div className='absolute bottom-10 left-0 right-0 flex justify-center'>
 						<button
 							className='p-[3vh] bg-red-700 rounded-full hover:bg-red-800 active:bg-red-900'
-							onClick={rejectCall}>
+							onClick={(e) => {
+								e.preventDefault();
+								rejectCall(loggedInUser, user, 'rejected');
+							}}>
 							<svg
 								xmlns='http://www.w3.org/2000/svg'
 								fill='none'
