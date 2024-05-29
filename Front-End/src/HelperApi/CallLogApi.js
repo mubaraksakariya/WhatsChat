@@ -82,4 +82,26 @@ const fetchCallLogs = async (page, pageSize) => {
 	}
 };
 
-export { addCallLog, fetchCallLogs };
+const calculateCallDuration = (answeringTime, callEndingTime) => {
+	const startTime = new Date(answeringTime);
+	const endTime = new Date(callEndingTime);
+	const durationInSeconds = (endTime - startTime) / 1000;
+	return formatTime(durationInSeconds);
+};
+
+const formatTime = (seconds) => {
+	const hrs = Math.floor(seconds / 3600);
+	const mins = Math.floor((seconds % 3600) / 60);
+	const secs = Math.floor(seconds % 60);
+
+	const formattedMins = mins.toString().padStart(2, '0');
+	const formattedSecs = secs.toString().padStart(2, '0');
+
+	if (hrs > 0) {
+		return `${hrs}:${formattedMins}:${formattedSecs}`;
+	} else {
+		return `${mins}:${formattedSecs}`;
+	}
+};
+
+export { addCallLog, fetchCallLogs, calculateCallDuration };

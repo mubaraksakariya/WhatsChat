@@ -28,6 +28,7 @@ export const ConfirmationProvider = ({ children }) => {
 					onConfirm={confirmation.onConfirm}
 					onReject={confirmation.onReject}
 					checkBoxList={confirmation.checkBoxList}
+					setConfirmation={setConfirmation}
 				/>
 			)}
 		</ConfirmationContext.Provider>

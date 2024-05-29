@@ -13,6 +13,7 @@ import VideoCallRinger from './Helpers/VideoCallRinger';
 import VideoCallMain from './Helpers/VideoCallMain';
 import { socket } from './WebsocketContext';
 import { addCallLog } from '../HelperApi/CallLogApi';
+import { addMessage } from '../HelperApi/MessageApi';
 // import { useWebSocket } from './WebsocketContext';
 
 const VideoCallContext = createContext();
@@ -50,7 +51,7 @@ export const VideoCallProvider = ({ children }) => {
 	const { loggedInUser } = useAuth();
 	const axios = useAxios();
 
-	const setCallLog = (log) => {
+	const setCallLog = async (log) => {
 		callLogRef.current = log;
 	};
 	// send iceCendidates to other user
@@ -164,7 +165,7 @@ export const VideoCallProvider = ({ children }) => {
 		setCallLog({
 			...callLogRef.current,
 			status: 'answered',
-			answeringTime: new Date().toISOString(),
+			callStartingTime: new Date().toISOString(),
 		});
 	};
 
@@ -197,9 +198,9 @@ export const VideoCallProvider = ({ children }) => {
 					status: 'ringing',
 				};
 				setCallLog(log);
-				const timerId = startTimer(() => {
+				const timerId = startTimer(async () => {
 					console.log('Timer finished');
-					setCallLog({
+					await setCallLog({
 						...callLogRef.current,
 						status: 'missed',
 					});
@@ -229,7 +230,7 @@ export const VideoCallProvider = ({ children }) => {
 				setCallLog({
 					...callLogRef.current,
 					status: 'accepted',
-					acceptingTime: new Date().toISOString(),
+					callStartingTime: new Date().toISOString(),
 				});
 			} catch (error) {
 				console.log('Error accepting call:', error);
@@ -243,7 +244,7 @@ export const VideoCallProvider = ({ children }) => {
 	};
 
 	// for both sides, to end calls  option two
-	const rejectCall = (e) => {
+	const rejectCall = async (e) => {
 		// call rejected by purely clicking the button
 		if (e) {
 			// inform the other side of rejection
@@ -326,12 +327,19 @@ export const VideoCallProvider = ({ children }) => {
 			}
 			if (callLogRef.current.type === 'incoming') {
 				if (callLogRef.current.status === 'missed') {
+					console.log(`the call ended without answering`);
+					setCallLog({
+						...callLogRef.current,
+						explanation: `the call ended without answering`,
+					});
+				} else if (callLogRef.current.status === 'ringing') {
 					console.log(
-						`the call rang for ${callEndingTime} seconds , without answering`
+						'the call ended from the other side before answering'
 					);
 					setCallLog({
 						...callLogRef.current,
-						explanation: `the call rang for ${callEndingTime} seconds , without answering`,
+						explanation:
+							'the call ended from the other side before answering',
 					});
 				} else {
 					console.log(
@@ -348,6 +356,16 @@ export const VideoCallProvider = ({ children }) => {
 		}
 		addCallLog(callLogRef.current);
 		console.log(callLogRef.current);
+
+		// add the log to message list too
+		const callLogMessage = {
+			type: 'callLog',
+			from: callLogRef.current.from.email,
+			to: callLogRef.current.to.email,
+			time: callLogRef.current.callingTime,
+			log: callLogRef.current,
+		};
+		await addMessage(callLogMessage);
 		callLogRef.current = {};
 		endCall();
 	};
