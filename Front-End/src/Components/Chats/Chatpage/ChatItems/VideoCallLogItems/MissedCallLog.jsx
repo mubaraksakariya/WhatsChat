@@ -2,8 +2,7 @@ import React from 'react';
 
 function MissedCallLog({ callLog, returnCall }) {
 	const makeVidoeCall = () => {
-		// returnCall();
-		console.log(callLog);
+		returnCall();
 	};
 	return (
 		<div

@@ -3,6 +3,7 @@ import ChatPageNav from '../../Components/Chats/Chatpage/ChatPageNav';
 import { useLocation } from 'react-router-dom';
 import ChatInput from '../../Components/Chats/Chatpage/ChatInput';
 import ChatScrollableDisplay from '../../Components/Chats/Chatpage/ScrollablePart/ChatScrollableDisplay';
+import { useAuth } from '../../Contexts/AuthContext';
 
 let setChatItemFunction;
 let chatItemState;
@@ -11,11 +12,17 @@ function ChatPage() {
 	const [chatItem, setChatItem] = useState([]);
 	const location = useLocation();
 	const user = location.state.user;
+	const { loggedInUser } = useAuth();
 	// saves message to chat, if user doese not exist creates one
 	setChatItemFunction = async (message) => {
-		if (message.from === user.email)
+		if (
+			message.from === user.email ||
+			message.from === loggedInUser.email
+		) {
 			setChatItem((old) => [...old, message]);
-		else console.log('message notification');
+		} else {
+			console.log('message notification');
+		}
 	};
 	chatItemState = chatItem;
 	return (

@@ -14,6 +14,9 @@ import VideoCallMain from './Helpers/VideoCallMain';
 import { socket } from './WebsocketContext';
 import { addCallLog } from '../HelperApi/CallLogApi';
 import { addMessage } from '../HelperApi/MessageApi';
+import { setChatItem } from '../Pages/User/ChatPage';
+import { addContact } from '../HelperApi/ContactApi';
+import { refreshChatFromChats } from '../Components/Chats/Chats';
 // import { useWebSocket } from './WebsocketContext';
 
 const VideoCallContext = createContext();
@@ -354,8 +357,8 @@ export const VideoCallProvider = ({ children }) => {
 				}
 			}
 		}
-		addCallLog(callLogRef.current);
-		console.log(callLogRef.current);
+		const callLog = addCallLog(callLogRef.current);
+		// console.log(callLog);
 
 		// add the log to message list too
 		const callLogMessage = {
@@ -365,7 +368,24 @@ export const VideoCallProvider = ({ children }) => {
 			time: callLogRef.current.callingTime,
 			log: callLogRef.current,
 		};
-		await addMessage(callLogMessage);
+		const savedMessage = await addMessage(callLogMessage);
+		try {
+			setChatItem(savedMessage);
+		} catch (error) {
+			//if the messager is not saved on the receiver side
+			// create a contact
+			const contact = {
+				first_name: savedMessage.from,
+				last_name: savedMessage.from,
+				email: savedMessage.from,
+			};
+			await addContact(contact);
+			refreshChatFromChats();
+		}
+		// save call log
+		try {
+			addCallLog(callLogRef.current);
+		} catch (error) {}
 		callLogRef.current = {};
 		endCall();
 	};

@@ -9,6 +9,7 @@ const CALL_LOG_STORE_NAME = 'calls';
 //     status:'calling'
 // }
 // Function to add a call log
+
 const addCallLog = async (callLog) => {
 	try {
 		const db = await openDatabase();
