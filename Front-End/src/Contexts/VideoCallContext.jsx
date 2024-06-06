@@ -48,7 +48,7 @@ export const VideoCallProvider = ({ children }) => {
 	const [remoteMediaStream, setRemoteMediaStream] = useState(null);
 	const [selectedDevice, setSelectedDevice] = useState(null);
 	const [user, setUser] = useState(null);
-	// const [callLog, setCallLog] = useState({});
+	const [callType, setCallType] = useState(undefined);
 	const callLogRef = useRef();
 	const callWaitingTime = 5000;
 	const { loggedInUser } = useAuth();
@@ -66,7 +66,6 @@ export const VideoCallProvider = ({ children }) => {
 
 	// receive icCandidate
 	const iceRecieve = (message) => {
-		console.log('ice received and added');
 		peerConnection.addIceCandidate(message.candidate);
 	};
 
@@ -115,21 +114,28 @@ export const VideoCallProvider = ({ children }) => {
 	};
 
 	// Runs when the video icon is pressed, sends offer, the caller side
-	const startVideoCall = async (user) => {
+	const startCall = async (user, type) => {
 		try {
+			setCallType(type);
 			setUser(user);
-			const stream = await getMediaStream();
+			const stream = await getMediaStream(type);
 			setLocalMediaStream(stream);
 			stream
 				.getTracks()
 				.forEach((track) => peerConnection.addTrack(track, stream));
 			const offer = await peerConnection.createOffer();
 			await peerConnection.setLocalDescription(offer);
-			makeVideoCall(user, loggedInUser, peerConnection.localDescription);
+			makeVideoCall(
+				user,
+				loggedInUser,
+				peerConnection.localDescription,
+				type
+			);
 			setIsVidoCall(true);
 
 			// set call log
 			const log = {
+				callType: type,
 				from: loggedInUser,
 				to: user,
 				callingTime: new Date().toISOString(),
@@ -180,7 +186,7 @@ export const VideoCallProvider = ({ children }) => {
 				new RTCSessionDescription(message.offer)
 			);
 			// get stream
-			const stream = await getMediaStream();
+			const stream = await getMediaStream(message.type);
 			setLocalMediaStream(stream);
 
 			// add stream to peerconnection
@@ -424,13 +430,14 @@ export const VideoCallProvider = ({ children }) => {
 				selectedDevice,
 				setSelectedDevice,
 				peerConnection,
-				startVideoCall,
+				startCall,
 				isRinging,
 				startRinging,
 				acceptCall,
 				rejectCall,
 				iceRecieve,
 				setCallState,
+				callType,
 			}}>
 			{children}
 

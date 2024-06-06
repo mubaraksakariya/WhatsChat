@@ -58,7 +58,8 @@ export const WebSocketProvider = ({ children }) => {
 						message.type === 'image' ||
 						message.type === 'audio' ||
 						message.type === 'delete' ||
-						message.type === 'video-call'
+						message.type === 'video-call' ||
+						message.type === 'audio-call'
 					) {
 						// console.log(message.type + ' message send');
 						ws.send(JSON.stringify({ content: message }));

@@ -50,12 +50,12 @@ const manageIncomingMessage = async (message) => {
 		};
 		socket.forwardToWebSocket(acknowledgement);
 	}
-	if (message.type === 'video-call') {
+	if (message.type === 'video-call' || message.type === 'audio-call') {
 		// incoming call, receives an offer
 		if (message.status === 'offer') {
 			await startRinging(message);
 			const callReached = {
-				type: 'video-call',
+				type: message.type,
 				status: 'reached',
 				to: message.from,
 				time: new Date().toLocaleString(),
@@ -65,7 +65,6 @@ const manageIncomingMessage = async (message) => {
 
 		// aknowledgment message that other device is being rung
 		if (message.status === 'reached') {
-			console.log('ringing');
 			changeCallState('ringing');
 		}
 		if (message.status === 'answer') {

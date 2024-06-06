@@ -8,14 +8,13 @@ import { useVideoCall } from '../../../Contexts/VideoCallContext';
 function ChatPageNav({ user }) {
 	const { logout } = useAuth();
 	const navigate = useNavigate();
-	const { startVideoCall } = useVideoCall();
+	const { startCall } = useVideoCall();
 
-	// const startVideoCall = () => {
-	// 	console.log('Video call');
-	// 	navigate('/video-call', { state: { user } });
-	// };
+	const startVideoCall = () => {
+		startCall(user, 'video-call');
+	};
 	const startAudioCall = () => {
-		console.log('Audio call');
+		startCall(user, 'audio-call');
 	};
 
 	return (
@@ -43,9 +42,7 @@ function ChatPageNav({ user }) {
 				</div>
 			</div>
 			<div className='flex items-center gap-5'>
-				<div
-					className='cursor-pointer'
-					onClick={() => startVideoCall(user)}>
+				<div className='cursor-pointer' onClick={startVideoCall}>
 					<svg
 						xmlns='http://www.w3.org/2000/svg'
 						viewBox='0 0 24 24'

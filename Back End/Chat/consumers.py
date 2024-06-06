@@ -88,7 +88,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'from': sender.email,
                     'acknowledgement_id':message['id'],
                 }
-            if type == 'video-call':
+            if type == 'video-call' or type == 'audio-call':
                 if message['status'] == 'offer':
                     message_to_forward = {
                         'type':type,

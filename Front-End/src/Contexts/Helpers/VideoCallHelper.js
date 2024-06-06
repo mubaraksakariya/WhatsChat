@@ -1,18 +1,27 @@
 import { socket } from '../WebsocketContext';
 
-const getMediaStream = async () => {
+const getMediaStream = async (callType) => {
+	console.log(callType);
 	const availableDevices = await getConnectedDevices('videoinput');
 	try {
 		const selectedDevice = availableDevices[0];
-		const constraints = {
-			audio: { echoCancellation: true },
-			video: {
-				deviceId: selectedDevice?.deviceId,
-				video: true,
-				audio: true,
-			},
-		};
+		let constraints;
 
+		if (callType === 'audio-call') {
+			constraints = {
+				audio: { echoCancellation: true },
+				video: false,
+			};
+		} else if (callType === 'video-call') {
+			constraints = {
+				audio: { echoCancellation: true },
+				video: {
+					deviceId: selectedDevice?.deviceId,
+				},
+			};
+		} else {
+			throw new Error('Invalid call type. Must be "audio" or "video".');
+		}
 		const stream = await navigator.mediaDevices.getUserMedia(constraints);
 		return stream;
 	} catch (error) {
@@ -70,9 +79,9 @@ const getConnectedDevices = async (type) => {
 	}
 };
 
-async function makeVideoCall(user, loggedInUser, offer) {
+async function makeVideoCall(user, loggedInUser, offer, callType) {
 	const signal = {
-		type: 'video-call',
+		type: callType,
 		from: loggedInUser.email,
 		to: user.email,
 		time: new Date().toLocaleString(),
