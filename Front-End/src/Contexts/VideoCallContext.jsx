@@ -200,6 +200,7 @@ export const VideoCallProvider = ({ children }) => {
 				setIsRinging(true);
 				// set call log
 				const log = {
+					callType: message.type,
 					from: user,
 					to: loggedInUser,
 					startTime: new Date().toISOString(),

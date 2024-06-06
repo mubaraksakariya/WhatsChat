@@ -8,17 +8,18 @@ import { useConfirmation } from '../../../../Contexts/ConfirmationContext';
 const VideoCallLogItem = React.memo(({ chatItem }) => {
 	const { loggedInUser } = useAuth();
 	const [callLog, setCallLog] = useState(chatItem.log);
-	const { startVideoCall } = useVideoCall();
+	const { startCall } = useVideoCall();
 	const { confirm } = useConfirmation();
 
 	const returnCall = () => {
+		console.log(chatItem);
 		let user =
 			chatItem.from === loggedInUser.email
 				? chatItem.log.to
 				: chatItem.log.from;
 		confirm(
-			'Make a video call?',
-			() => startVideoCall(user),
+			'Make a call?',
+			() => startCall(user, chatItem.log.callType),
 			() => {
 				console.log('not to call');
 			}

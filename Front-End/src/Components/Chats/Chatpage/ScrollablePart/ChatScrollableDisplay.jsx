@@ -34,7 +34,7 @@ function ChatScrollableDisplay({ chatItem, setChatItem, user }) {
 		return () => {
 			observer.disconnect();
 		};
-	}, [isScrollingToTop]); // Update the dependency array
+	}, [isScrollingToTop]);
 
 	useEffect(() => {
 		const observer = new IntersectionObserver(([entry]) => {
