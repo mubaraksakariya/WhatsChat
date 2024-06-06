@@ -15,6 +15,11 @@ function TextItem({ chatItem }) {
 	const [isDropDown, setIsDropDown] = useState(false);
 	const [message, setMessage] = useState(chatItem);
 
+	// to determine kind of message, if it is a send or received or deleted
+	const isMessageDeleted = message?.is_deleted === true;
+	const isSendMessage = message?.from === loggedInUser?.email;
+	const isReceivedMessage = message?.from !== loggedInUser?.email;
+
 	useEffect(() => {
 		if (
 			message &&
@@ -41,12 +46,9 @@ function TextItem({ chatItem }) {
 		setIsDropDown(false);
 	};
 
-	if (
-		loggedInUser &&
-		message &&
-		message.from === loggedInUser.email &&
-		message.is_deleted !== true
-	) {
+	if (isMessageDeleted) return <DeletedChatItem message={message} />;
+
+	if (isSendMessage) {
 		return (
 			<div className='flex justify-end px-3 py-2 '>
 				<div
@@ -66,17 +68,14 @@ function TextItem({ chatItem }) {
 							/>
 						</div>
 					)}
-					<div className=' text-lg pe-2'>{message.text}</div>
+					<div className=' text-lg pe-5'>{message.text}</div>
 					<ChatItemBottomDetails message={message} />
 				</div>
 			</div>
 		);
-	} else if (
-		loggedInUser &&
-		message &&
-		message.from !== loggedInUser.email &&
-		message.is_deleted !== true
-	) {
+	}
+
+	if (isReceivedMessage) {
 		return (
 			<div className='px-3 py-2 '>
 				<div
@@ -96,14 +95,14 @@ function TextItem({ chatItem }) {
 							/>
 						</div>
 					)}
-					<div className=' text-lg pe-2'>{message.text}</div>
+					<div className=' text-lg pe-5'>{message.text}</div>
 					<div className='text-xs flex justify-end items-end gap-2 text-themeText2'>
 						{message.time}
 					</div>
 				</div>
 			</div>
 		);
-	} else return <DeletedChatItem message={message} />;
+	}
 }
 
 export default TextItem;

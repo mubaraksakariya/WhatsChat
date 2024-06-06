@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 function ChatItemBottomDetails({ message }) {
 	return (
 		<div className='text-xs flex justify-end items-end gap-2 text-themeText2'>
-			{message && message.time}
-			{message && message.status === 'error' && (
+			{message?.time}
+			{message?.status === 'error' && (
 				<svg
 					xmlns='http://www.w3.org/2000/svg'
 					fill='none'
@@ -19,7 +19,7 @@ function ChatItemBottomDetails({ message }) {
 					/>
 				</svg>
 			)}
-			{message && message.status === 'received' && (
+			{message?.status === 'received' && (
 				<svg
 					xmlns='http://www.w3.org/2000/svg'
 					viewBox='0 0 20 20'
@@ -32,7 +32,7 @@ function ChatItemBottomDetails({ message }) {
 					/>
 				</svg>
 			)}
-			{message && message.status === 'read' && (
+			{message?.status === 'read' && (
 				<svg
 					xmlns='http://www.w3.org/2000/svg'
 					viewBox='0 0 20 20'
@@ -45,7 +45,7 @@ function ChatItemBottomDetails({ message }) {
 					/>
 				</svg>
 			)}
-			{message && message.status === 'seen' && (
+			{message?.status === 'seen' && (
 				<svg
 					xmlns='http://www.w3.org/2000/svg'
 					viewBox='0 0 20 20'
